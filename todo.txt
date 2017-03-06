@@ -1,0 +1,67 @@
+-Un programme qui emule un terminal.
+
+parseur dynamique qui analyse des commandes validées avec '\n':
+	
+	-load <aquarium_file>
+	-show aquarium 
+	-add view <ID> <pos_x>x<pos_y>+<width>+<height>
+	-del view <ID> 
+	-save <aquarium_file>
+	-exit (=> kill si serveur lancé)	
+
+	-launch
+	-kill
+
+
+
+
+-Le serveur de l'aquarium
+
+
+
+controller.cfg : 
+	       structure -port
+	       		 -valeur timeout
+			 -intervalle mise a jour poissons
+		
+		parseur statique (lex)
+
+
+
+
+STRUCTURES PRINCIPALES
+
+Aquarium :
+	 -taille globale
+	 -tableau des vues
+	 -tableau des poissons
+		  
+Vue : 		  
+    	-position
+	-taille
+
+
+Poisson :
+	-identifiant/nom
+	-position
+	-taille
+	-mobilité
+
+
+
+Socket TCP : 
+	Création (bind, listen, accept)
+	
+
+	parseur dynamique pour la réception des messages suivants avec '\n' :
+		  
+		  -hello [in as <ID_client>]	
+		  -getFishes
+		  -getFishesContinously
+		  -log out
+		  -ping <int>
+		  -status 
+		  -addFish <fish_ID/NAME> at <pos_x>x<pos_y>, <width>x<height>, <mobilité>
+		  -delFish <fish_ID/NAME>
+		  -startFish <fish_ID/NAME>
+		  
