@@ -15,15 +15,11 @@ public class ConfigParser{
 	    InputStreamReader ipsr=new InputStreamReader(ips);
 	    BufferedReader br=new BufferedReader(ipsr);
 	    String line;
-	    int i = 0;
 	    while ((line=br.readLine())!=null){
-		System.out.println(i++);
-		System.out.println(line);
 		if(line.charAt(0) != '#' && line != "\n"){
 		    String[] words = line.split(" ");
-		    System.out.println("words : " + words[2]);
 		    switch (words[0]){
-d		    case "controller-address":
+		    case "controller-address":
 			controllerAddress = words[2];
 			break;
 		    case "controller-port":
@@ -32,7 +28,7 @@ d		    case "controller-address":
 		    case "display-timeout-value":
 			displayTimeoutValue = Integer.parseInt(words[2]);
 			break;
-		    case "ressources":
+		    case "resources":
 			ressources = words[2];
 			break;
 		    case "\n":

@@ -1,0 +1,25 @@
+public class Client {
+
+    public static void main(String args[]){
+	
+	Socket socket = null;
+	Thread t = null;
+	
+	try {
+	    
+	    socket = new Socket(args[0], 8080);
+	    System.out.println(InetAddress.getLocalHost());
+	    System.out.println("Connexion avec le serveur, demande d'authentificaiton :");
+	    
+	    t = new Thread(new Connexion(socket));
+	    t.start();
+	    
+	} catch(UnknownHostException e){
+	    System.err.println("Impossible de se connecter a l'adresse " + socket.getLocalAddress());
+	} catch(IOException e){
+	    System.err.println("Aucun serveur a l'ecoute du port " + socket.getLocalPort());
+	} 
+	
+    }
+
+}
