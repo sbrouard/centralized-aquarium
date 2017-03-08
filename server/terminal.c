@@ -1,8 +1,13 @@
 #include "terminal.h"
 
 //ajouter des ' ' pour les commande pour remplire les MAX_SIZE_CMD caractéres
-#define NBR_CMD 2
-command_function cmd_func[]={{"load  ",parse_load},{"exit  ",parse_exit}};
+#define NBR_CMD 6
+command_function cmd_func[]={{"load  ",parse_load},
+				{"exit  ",parse_exit},
+				{"save  ",parse_save},
+				{"show  ",parse_show_aquarium},
+				{"add   ",parse_add_view},
+				{"del   ",parse_del_view}};
 
 int init_terminal(terminal *term)
 {
@@ -14,9 +19,25 @@ int init_terminal(terminal *term)
 
 	fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
 
-	term->cl.filename.length = 0;
-	term->cl.filename.malloc_size = 0;
-	term->cl.filename.str = NULL;
+	zero_str_arg(&term->cv.id);
+	zero_str_arg(&term->split_cmd);
+	term->cv.pos_x = -1;
+	term->cv.pos_y = -1;
+	term->cv.width = -1;
+	term->cv.height = -1;
+}
+
+void zero_str_arg(str_arg *str)
+{
+	str->length = 0;
+	str->malloc_size = 0;
+	str->str = NULL;
+}
+
+void free_str_arg(str_arg *str)
+{
+	free(str->str);
+	zero_str_arg(str);
 }
 
 int next_char(terminal *term)
@@ -71,8 +92,17 @@ int flush_cmd(terminal *term)
 
 int syntax_error(char *error, terminal *term)
 {
-	printf("%d : %s\n",term->caracter_count,error);
+	int i;
+
+	for(i=0;i<term->caracter_count;i++)
+		printf(" ");
+	printf("^\n");
+	printf("Syntax error : %s\n",error);
 	term->function = flush_cmd;
+	term->cv.pos_x = -1;
+	term->cv.pos_y = -1;
+	term->cv.width = -1;
+	term->cv.height = -1;
 	return flush_cmd(term);
 }
 
@@ -190,6 +220,21 @@ int parse_str_arg(terminal *term,str_arg *str)
 	}
 }
 
+int parse_int(terminal *term,int *value)
+{
+	for(;;)
+	{
+		if(next_char(term) >= '0' && next_char(term) <= '9')
+		{
+			if(*value == -1)
+				*value = 0;
+			*value = (*value)*10 + get_char(term)-0x30;
+		}else if(next_char(term) == NO_MORE_READ)
+			return 0;
+		else
+			return 1;
+	}
+}
 //command parsing functions
 int parse_load(terminal *term)
 {
@@ -201,10 +246,13 @@ int parse_load(terminal *term)
 				return 0;
 		case 2:
 			term->state = 2;
-			if(!parse_str_arg(term,&term->cl.filename))
+			if(!parse_str_arg(term,&term->split_cmd))
 				return 0;
-			if(term->cl.filename.length == 0)
+			if(term->split_cmd.length == 0)
+			{
+				free_str_arg(&term->split_cmd);
 				return syntax_error("expected string",term);
+			}
 		case 3:
 			term->state = 3;
 			if(!parse_blank(term))
@@ -213,16 +261,276 @@ int parse_load(terminal *term)
 			term->state = 4;
 			if(next_char(term) == NO_MORE_READ)
 				return 0;
-			if(get_char(term) != '\n')
+			if(next_char(term) != '\n')
+			{
+				free_str_arg(&term->split_cmd);
 				return syntax_error("unexpected argument",term);
+			}else
+				get_char(term);
 	}
 
 	cmd_load(term);
 
-	term->cl.filename.length = 0;
-	term->cl.filename.malloc_size = 0;
-	free(term->cl.filename.str);
-	term->cl.filename.str = NULL;
+	free_str_arg(&term->split_cmd);
+	
+	return 1;
+}
+
+int parse_save(terminal *term)
+{
+	switch(term->state)
+	{
+		case 1:
+			term->state = 1;
+			if(!parse_blank(term))
+				return 0;
+		case 2:
+			term->state = 2;
+			if(!parse_str_arg(term,&term->split_cmd))
+				return 0;
+			if(term->split_cmd.length == 0)
+			{
+				free_str_arg(&term->split_cmd);
+				return syntax_error("expected string",term);
+			}
+		case 3:
+			term->state = 3;
+			if(!parse_blank(term))
+				return 0;
+		case 4:
+			term->state = 4;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != '\n')
+			{
+				free_str_arg(&term->split_cmd);
+				return syntax_error("unexpected argument",term);
+			}else
+				get_char(term);
+	}
+
+	cmd_save(term);
+
+	free_str_arg(&term->split_cmd);
+	
+	return 1;
+}
+
+int parse_show_aquarium(terminal *term)
+{
+	switch(term->state)
+	{
+		case 1:
+			term->state = 1;
+			if(!parse_blank(term))
+				return 0;
+		case 2:
+			term->state = 2;
+			if(!parse_str_arg(term,&term->split_cmd))
+				return 0;
+			if(term->split_cmd.length != 8 || strncmp(term->split_cmd.str,"aquarium",8) != 0)
+			{
+				free_str_arg(&term->split_cmd);
+				return syntax_error("Unknow command",term);
+			}
+		case 3:
+			term->state = 3;
+			if(!parse_blank(term))
+				return 0;
+		case 4:
+			term->state = 4;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != '\n')
+			{
+				free_str_arg(&term->split_cmd);
+				return syntax_error("unexpected argument",term);
+			}else
+				get_char(term);
+
+	}
+
+	cmd_show_aquarium(term);
+
+	free_str_arg(&term->split_cmd);
+	
+	return 1;
+}
+
+int parse_del_view(terminal *term)
+{
+	switch(term->state)
+	{
+		case 1:
+			term->state = 1;
+			if(!parse_blank(term))
+				return 0;
+		case 2:
+			term->state = 2;
+			if(!parse_str_arg(term,&term->split_cmd))
+				return 0;
+			if(term->split_cmd.length != 4 || strncmp(term->split_cmd.str,"view",4) != 0)
+			{
+				free_str_arg(&term->split_cmd);
+				return syntax_error("Unknow command",term);
+			}
+			free_str_arg(&term->split_cmd);
+		case 3:
+			term->state = 3;
+			if(!parse_blank(term))
+				return 0;
+		case 4:
+			term->state = 4;
+			if(!parse_str_arg(term,&term->cv.id))
+				return 0;
+			if(term->cv.id.length == 0)
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("Expected string",term);
+			}
+		case 5:
+			term->state = 5;
+			if(!parse_blank(term))
+				return 0;
+		case 6:
+			term->state = 6;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != '\n')
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("unexpected argument",term);
+			}else
+				get_char(term);
+
+
+	}
+
+	cmd_del_view(term);
+
+	free_str_arg(&term->cv.id);
+	
+	return 1;
+}
+
+int parse_add_view(terminal *term)
+{
+	switch(term->state)
+	{
+		case 1:
+			term->state = 1;
+			if(!parse_blank(term))
+				return 0;
+		case 2:
+			term->state = 2;
+			if(!parse_str_arg(term,&term->split_cmd))
+				return 0;
+			if(term->split_cmd.length != 4 || strncmp(term->split_cmd.str,"view",4) != 0)
+			{
+				free_str_arg(&term->split_cmd);
+				return syntax_error("Unknow command",term);
+			}
+			free_str_arg(&term->split_cmd);
+		case 3:
+			term->state = 3;
+			if(!parse_blank(term))
+				return 0;
+		case 4:
+			term->state = 4;
+			if(!parse_str_arg(term,&term->cv.id))
+				return 0;
+			if(term->cv.id.length == 0)
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("Expected string",term);
+			}
+		case 5:
+			term->state = 5;
+			if(!parse_blank(term))
+				return 0;
+		case 6:
+			term->state = 6;
+			if(!parse_int(term,&term->cv.pos_x))
+				return 0;
+			if(term->cv.pos_x == -1)
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("Expected number",term);
+			}
+		case 7:
+			term->state = 7;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != 'x')
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("expected x",term);
+			}else
+				get_char(term);
+		case 8:
+			term->state = 8;
+			if(!parse_int(term,&term->cv.pos_y))
+				return 0;
+			if(term->cv.pos_y == -1)
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("Expected number",term);
+			}
+		case 9:
+			term->state = 9;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != '+')
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("expected +",term);
+			}else
+				get_char(term);
+		case 10:
+			term->state = 10;
+			if(!parse_int(term,&term->cv.width))
+				return 0;
+			if(term->cv.width == -1)
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("Expected number",term);
+			}
+		case 11:
+			term->state = 11;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != '+')
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("expected +",term);
+			}else
+				get_char(term);
+		case 12:
+			term->state = 12;
+			if(!parse_int(term,&term->cv.height))
+				return 0;
+			if(term->cv.height == -1)
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("Expected number",term);
+			}
+		case 13:
+			term->state = 13;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != '\n')
+			{
+				free_str_arg(&term->cv.id);
+				return syntax_error("unexpected argument",term);
+			}else
+				get_char(term);
+
+
+	}
+
+	cmd_add_view(term);
+
+	free_str_arg(&term->cv.id);
 	
 	return 1;
 }
@@ -239,8 +547,11 @@ int parse_exit(terminal *term)
 			term->state = 2;
 			if(next_char(term) == NO_MORE_READ)
 				return 0;
-			if(get_char(term) != '\n')
+			if(next_char(term) != '\n')
 				return syntax_error("unexpected argument",term);
+			else
+				get_char(term);
+
 	}
 
 	term->is_killed = 1;
@@ -252,6 +563,40 @@ int parse_exit(terminal *term)
 void cmd_load(terminal *term)
 {
 	write(1,"loadind file : ",15);
-	write(1,term->cl.filename.str,term->cl.filename.length);
+	write(1,term->split_cmd.str,term->split_cmd.length);
+	write(1,"\n",1);
+}
+
+void cmd_save(terminal *term)
+{
+	write(1,"saving file : ",14);
+	write(1,term->split_cmd.str,term->split_cmd.length);
+	write(1,"\n",1);
+}
+
+void cmd_show_aquarium(terminal *term)
+{
+	write(1,"   __\n",6);
+	write(1,"|\\/ *\\\n",7);
+	write(1,"|/\\__/\n",7);
+}
+
+void cmd_add_view(terminal *term)
+{
+	write(1,"adding view : ",14);
+	write(1,term->cv.id.str,term->cv.id.length);
+	write(1,"\n",1);
+	
+	printf("pos x : %d\n",term->cv.pos_x);
+	printf("pos y : %d\n",term->cv.pos_y);
+	printf("width : %d\n",term->cv.width);
+	printf("height : %d\n",term->cv.height);
+
+}
+
+void cmd_del_view(terminal *term)
+{
+	write(1,"deleting view : ",16);
+	write(1,term->cv.id.str,term->cv.id.length);
 	write(1,"\n",1);
 }

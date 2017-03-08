@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include "terminal.h"
 
 
 #define MAX_VIEWS 8
@@ -40,7 +42,7 @@ struct aquarium{
 
 struct fish{
   char * name;
-  struct dimensions;
+  struct dimensions size;
   char * mobility;
   struct coord pos;
 };
@@ -57,6 +59,16 @@ struct client_data{
   int buffer_size;
 };
 
+typedef struct server{
+	int socket;
+	struct client_data *client_list;
+	int nb_client;
+	terminal term;
+}server;
+
+int read_server(server *,fd_set*);
+int fd_to_read(server *,fd_set *);
+int init_server(server *);
 
 int initialization(int);
 

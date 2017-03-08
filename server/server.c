@@ -111,3 +111,71 @@ int read_client(struct client_data* client){
 }
 
 
+int init_server(server *t)
+{
+	t->socket = -1;
+	t->nb_client = 0;
+	t->client_list = NULL;
+	init_terminal(&t->term);
+
+	return 0;
+}
+
+int fd_to_read(server *serv,fd_set *set)
+{
+	int nfds = 0,i;
+
+	//on écoute le stdin
+	FD_SET(0,set);
+
+	if(serv->socket != -1)
+	{
+		nfds = serv->socket;
+		FD_SET(serv->socket,set);
+	}
+
+	for(i=0;i<serv->nb_client;i++)
+	{
+		FD_SET(serv->client_list[i].socket,set);
+
+		if(serv->client_list[i].socket > nfds)
+			nfds = serv->client_list[i].socket;
+	}
+
+	return nfds + 1;
+}
+
+int read_server(server *serv,fd_set *set)
+{
+	int i;
+
+	if(FD_ISSET(0,set))
+	{
+		read_terminal(&serv->term);
+	}
+
+	if(FD_ISSET(serv->socket,set))
+	{
+		//accept_client(serv);
+	}
+
+	for(i=0;i<serv->nb_client;i++)
+	{
+		if(FD_ISSET(serv->client_list[i].socket,set))
+		{
+			read_client(&serv->client_list[i]);
+		}
+	}
+
+	return 0;
+}
+
+int hello(struct client_data* client, int indice){return 0;}
+int getFishes(struct client_data* client, int indice){return 0;}
+int getFishesContinously(struct client_data* client, int indice){return 0;}
+int log_out(struct client_data* client, int indice){return 0;}
+int ping(struct client_data* client, int indice){return 0;}
+int status(struct client_data* client, int indice){return 0;}
+int addFish(struct client_data* client, int indice){return 0;}
+int delFish(struct client_data* client, int indice){return 0;}
+int startFish(struct client_data* client, int indice){return 0;}

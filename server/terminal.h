@@ -19,9 +19,11 @@ typedef struct str_arg{
 	int malloc_size;
 }str_arg;
 
-typedef struct command_load{
-	str_arg filename;
-}command_load;
+typedef struct command_view{
+	str_arg id;
+	int pos_x,pos_y;
+	int width,height;
+}command_view;
 
 typedef struct terminal{
 	int state;
@@ -33,7 +35,8 @@ typedef struct terminal{
 	int caracter_count;
 	int (*function)(struct terminal*);
 
-	command_load cl;
+	str_arg split_cmd;
+	command_view cv;
 }terminal;
 
 typedef struct command_function{
@@ -42,10 +45,20 @@ typedef struct command_function{
 	//ptr sur fonction de parsage
 }command_function;
 
+void zero_str_arg(str_arg *str);
+void free_str_arg(str_arg *str);
 void read_terminal(terminal *);
 int parse_load(terminal*);
 int parse_exit(terminal*);
+int parse_save(terminal *term);
+int parse_show_aquarium(terminal *term);
+int parse_add_view(terminal *term);
+int parse_del_view(terminal *term);
 
 void cmd_load(terminal*);
+void cmd_save(terminal *term);
+void cmd_show_aquarium(terminal *term);
+void cmd_add_view(terminal *term);
+void cmd_del_view(terminal *term);
 
 #endif
