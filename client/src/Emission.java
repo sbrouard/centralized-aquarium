@@ -39,14 +39,18 @@ public class Emission implements Runnable {
     */
 
     public void run(){
-	
-	Scanner sc = new Scanner(System.in);
-	String cmd;
-	PrintWriter out = new PrintWriter(socket.getOutputStream());
 
-	while(true){
-	    cmd = sc.nextLine();
-	    out.println(cmd);
+	try{
+	    Scanner sc = new Scanner(System.in);
+	    String cmd;
+	    PrintWriter out = new PrintWriter(socket.getOutputStream());
+
+	    while(true){
+		cmd = sc.nextLine();
+		out.println(cmd);
+	    }
+	} catch (IOException e){
+	    System.err.println("le serveur ne répond pas");
 	}
     }
 }

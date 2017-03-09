@@ -1,4 +1,4 @@
-TST=TestConfigParser.java\
+TST=TestConfigParser\
 
 
 all: clean

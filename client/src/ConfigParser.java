@@ -15,8 +15,9 @@ public class ConfigParser{
 	    InputStreamReader ipsr=new InputStreamReader(ips);
 	    BufferedReader br=new BufferedReader(ipsr);
 	    String line;
+
 	    while ((line=br.readLine())!=null){
-		if(line.charAt(0) != '#' && line != "\n"){
+		if(line.length() != 0 && line.charAt(0) != '#'){
 		    String[] words = line.split(" ");
 		    switch (words[0]){
 		    case "controller-address":
@@ -31,7 +32,7 @@ public class ConfigParser{
 		    case "resources":
 			ressources = words[2];
 			break;
-		    case "\n":
+		    case "id":
 			break;
 		    default:
 			System.out.println("Error in "+ fileName);

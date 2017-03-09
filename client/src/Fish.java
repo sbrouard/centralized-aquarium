@@ -40,11 +40,11 @@ public class Fish{
 	return height;
     }
 
-    public int setPosX(int newPosX){
+    public void setPosX(int newPosX){
 	pos_x = newPosX;
     }
 
- public int setPosY(int newPosY){
+    public void setPosY(int newPosY){
 	pos_y = newPosY;
     }
 }
