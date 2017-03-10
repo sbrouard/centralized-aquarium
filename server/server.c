@@ -116,7 +116,6 @@ int init_server(struct server *t)
 	t->socket = -1;
 	t->nb_client = 0;
 	t->client_list = NULL;
-	init_terminal(&t->term);
 
 	return 0;
 }

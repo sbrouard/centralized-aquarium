@@ -1,13 +1,14 @@
 #include "terminal.h"
 
 //ajouter des ' ' pour les commande pour remplire les MAX_SIZE_CMD caractéres
-#define NBR_CMD 6
+#define NBR_CMD 7
 command_function cmd_func[]={{"load  ",parse_load},
 				{"exit  ",parse_exit},
 				{"save  ",parse_save},
 				{"show  ",parse_show_aquarium},
 				{"add   ",parse_add_view},
-				{"del   ",parse_del_view}};
+				{"del   ",parse_del_view},
+				{"launch",parse_launch}};
 
 int init_terminal(terminal *term)
 {
@@ -236,6 +237,31 @@ int parse_int(terminal *term,int *value)
 	}
 }
 //command parsing functions
+int parse_launch(terminal *term)
+{
+	switch(term->state)
+	{
+		case 1:
+			term->state = 1;
+			if(!parse_blank(term))
+				return 0;
+		case 2:
+			term->state = 2;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != '\n')
+				return syntax_error("unexpected argument",term);
+			else
+				get_char(term);
+
+	}
+
+	cmd_launch(term);
+
+	return 1;
+
+}
+
 int parse_load(terminal *term)
 {
 	switch(term->state)
@@ -599,4 +625,35 @@ void cmd_del_view(terminal *term)
 	write(1,"deleting view : ",16);
 	write(1,term->cv.id.str,term->cv.id.length);
 	write(1,"\n",1);
+}
+
+void cmd_launch(terminal *term)
+{
+	struct sockaddr_in listen_addr;
+
+	if(term->serv.socket != -1)
+	{
+		printf("server already launched\n");
+		return;
+	}
+
+	term->serv.socket = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
+
+	listen_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	listen_addr.sin_port = htons(term->serv.conf.controller_port);
+	listen_addr.sin_family = AF_INET;
+
+	if(bind(term->serv.socket,(struct sockaddr*)&listen_addr,sizeof(struct sockaddr_in)) == -1)
+	{
+		perror("bind()");
+		term->serv.socket = -1;
+		return;
+	}
+
+	if(listen(term->serv.socket,term->serv.conf.max_client) == -1)
+	{
+		perror("listen()");
+		term->serv.socket = -1;
+		return;
+	}
 }

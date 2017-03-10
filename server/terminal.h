@@ -7,6 +7,10 @@
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include "server.h"
 
 #define MAX_SIZE_CMD 6
 #define NO_MORE_READ 256
@@ -34,6 +38,7 @@ typedef struct terminal{
 	unsigned char next_c;
 	int caracter_count;
 	int (*function)(struct terminal*);
+	struct server serv;
 
 	str_arg split_cmd;
 	command_view cv;
@@ -54,11 +59,13 @@ int parse_save(terminal *term);
 int parse_show_aquarium(terminal *term);
 int parse_add_view(terminal *term);
 int parse_del_view(terminal *term);
+int parse_launch(terminal *term);
 
 void cmd_load(terminal*);
 void cmd_save(terminal *term);
 void cmd_show_aquarium(terminal *term);
 void cmd_add_view(terminal *term);
 void cmd_del_view(terminal *term);
+void cmd_launch(terminal *term);
 
 #endif

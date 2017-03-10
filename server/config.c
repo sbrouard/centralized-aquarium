@@ -1,4 +1,4 @@
-#include "config.c"
+#include "config.h"
 
 #define MAX_LEN_VALUE_NAME 21
 #define NBR_VALUE_NAME 4
@@ -17,7 +17,7 @@ void default_config(server_config *sc)
 
 void parse_config_file(server_config *sc)
 {
-	int file,length,status,value;
+	int file,length,status,value,i,line,c_number;
 	char c,value_name[MAX_LEN_VALUE_NAME];
 
 	default_config(sc);
@@ -26,6 +26,7 @@ void parse_config_file(server_config *sc)
 
 	if(file == -1)
 	{
+		printf("failed to open config file :\n");
 		perror("open()");
 		return ;
 	}
@@ -35,59 +36,81 @@ void parse_config_file(server_config *sc)
 	length = 0;
 	status = 0;
 	value = 0;
+	line = 0;
+	c_number = 0;
 
 	while(read(file,&c,1) == 1)
 	{
+		c_number++;
 		switch(status)
 		{
 			case 0:
-				if(c != ' ' && c != '=')
+				if(c == ' ' || c =='\t')
+					break;
+				else if( c == '\n')
+				{
+					line++;
+					break;
+				}
+				else if(c == '#')
+				{
+					status = 7;
+					break;
+				}
+			case 1:
+				if(c != ' '&& c != '\t' && c != '=')
 				{
 					if(length > MAX_LEN_VALUE_NAME)
 					{
-						printf("Unknow value name\n");
-						status = 5;
+						printf("line %d:%d Unknow value name\n",line,c_number);
+						status = 7;
 					}
 					value_name[length] = c;
 					length++;
 					break;
 				}	
-			case 1:
-				status = 1;
-				if(c == ' ')
-					break;
-				else if(c != '=')
-				{
-					printf("Unexpected %c\n",c);
-					status = 5;
-					break;
-				}
-			case 2 :
+			case 2:
 				status = 2;
-				if(c == ' ')
+				if(c == ' ' || c == '\t')
 					break;
-				else if(c < '0' || c > '9')
+				else if(c == '=')
 				{
-					printf("Unexpected %c\n",c);
-					status = 5;
+					status = 3;
+					break;
+				}else
+				{
+					printf("line %d:%d Unexpected %c\n",line,c_number,c);
+					status = 7;
 					break;
 				}
-			case 3 :
+			case 3:
 				status = 3;
+				if(c == ' ' || c =='\t')
+					break;
+			case 4 :
+				status = 4;
+				if(c < '0' || c > '9')
+				{
+					printf("line %d:%d Unexpected %c\n",line,c_number,c);
+					status = 7;
+					break;
+				}
+			case 5 :
+				status = 5;
 
 				if(c >= '0' && c <= '9')
 				{
-					value += c - 0x31;
+					value = value*10 + c - 0x30;
 					break;
-				}else if(c != ' ' && c != '\n')
+				}else if(c != ' ' && c != '\n' && c != '\t')
 				{
-					printf("Unexpected %c\n",c);
-					status = 5;
+					printf("line %d:%d Unexpected %c\n",line,c_number,c);
+					status = 7;
 					break;
 				}
-			case 4 :
-				status = 4;
-				if(c == ' ')
+			case 6 :
+				status = 6;
+				if(c == ' ' || c == '\t')
 					break;
 				else if(c == '\n')
 				{
@@ -95,37 +118,42 @@ void parse_config_file(server_config *sc)
 					{
 						if(strncmp(value_name,name_fctns[i].value_name,length) == 0)
 						{
-							name_fctn[i].fonction(sc,value);
+							name_fctns[i].fonction(sc,value);
 							break;
 						}
 					}
 
 					if(i==NBR_VALUE_NAME)
 					{
-						printf("Unknow value name\n");
+						printf("line %d:%d Unknow value name\n",line,c_number);
 					}
 					length = 0;
 					status = 0;
 					value = 0;
+					c_number = 0;
+					line++;
 
 					break;
 				}else
 				{
-					printf("Unexpected %c\n",c);
-					status = 5;
+					printf("line %d:%d Unexpected %c\n",line,c_number,c);
+					status = 7;
 					break;
 
 				}
 				break;
-			case 5:
+			case 7:
 				if(c == '\n')
 				{
+					line++;
 					length = 0;
 					status = 0;
 					value = 0;
+					c_number = 0;
 				}
 				break;
 		}
+	}
 
 	if(status == 4)
 	{
@@ -134,7 +162,7 @@ void parse_config_file(server_config *sc)
 		{
 			if(strncmp(value_name,name_fctns[i].value_name,length) == 0)
 			{
-				name_fctn[i].fonction(sc,value);
+				name_fctns[i].fonction(sc,value);
 				break;
 			}
 		}
@@ -151,20 +179,24 @@ void parse_config_file(server_config *sc)
 
 void fill_controller_port(server_config* sc,int value)
 {
-	sd->controller_port = value;
+	printf("parsed controller_port : %d\n",value);
+	sc->controller_port = value;
 }
 
-void fill_display_timeout_value(server_config* sc,int value);
+void fill_display_timeout_value(server_config* sc,int value)
 {
-	sd->display_timeout = value;
+	printf("parsed display_timeout_value : %d\n",value);
+	sc->display_timeout_value = value;
 }
 
-void fill_fish_update_interval(server_config* sc,int value);
+void fill_fish_update_interval(server_config* sc,int value)
 {
-	sd->fish_update_interval = value;
+	printf("parsed fish_update_interval : %d\n",value);
+	sc->fish_update_interval = value;
 }
 
-void fill_max_client(server_config* sc,int value);
+void fill_max_client(server_config* sc,int value)
 {
-	sd->max_client = value;
+	printf("parsed max_client : %d\n",value);
+	sc->max_client = value;
 }

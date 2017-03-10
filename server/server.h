@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
-
+#include "config.h"
 
 
 #define MAX_VIEWS 9
@@ -71,11 +71,12 @@ struct server{
   struct client_data *client_list;
   int nb_client;
   struct aquarium aqua;
+  struct server_config conf;
 };
 
 
 int fd_to_read(struct server *,fd_set *);
-int read_server(struct server *,fed_set *);
+int read_server(struct server *,fd_set *);
 int init_server(struct server *);
 
 int initialization(int);

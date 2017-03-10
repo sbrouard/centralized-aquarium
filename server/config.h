@@ -10,7 +10,7 @@
 #define DEFAULT_CONTROLLER_PORT 12345
 #define DEFAULT_DISPLAY_TIMEOUT 45
 #define DEFAULT_FISH_UPDATE_INTERVAL 1
-#define DEFAULT_MAX_CLIENT = 20
+#define DEFAULT_MAX_CLIENT 20
 #define CONFIG_FILE_NAME "controller.cfg"
 
 typedef struct server_config{
