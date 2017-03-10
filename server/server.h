@@ -8,13 +8,16 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "terminal.h"
+#include <errno.h>
 
 
-#define MAX_VIEWS 8
+
+#define MAX_VIEWS 9
 #define MAX_SIZE_COMMAND 256
 
-
+#define AVAILABLE -1
+#define NOTAVAILABLE 1
+#define NOVIEW -1
 
 
 struct coord{
@@ -29,6 +32,7 @@ struct dimensions{
 
 
 struct view{
+  int client;
   struct coord pos;
   struct dimensions size;
 
@@ -37,7 +41,9 @@ struct view{
 struct aquarium{
   struct dimensions size;
   struct view* views;
+  int nb_views;
   struct fish* fishes;
+  int nb_fishes;
 };
 
 struct fish{
@@ -55,34 +61,35 @@ struct controller{
 
 struct client_data{
   int socket;
+  int id_view;
   char buffer[MAX_SIZE_COMMAND];
   int buffer_size;
 };
 
-typedef struct server{
-	int socket;
-	struct client_data *client_list;
-	int nb_client;
-	terminal term;
-}server;
+struct server{
+  int socket;
+  struct client_data *client_list;
+  int nb_client;
+  struct aquarium aqua;
+};
 
-int read_server(server *,fd_set*);
-int fd_to_read(server *,fd_set *);
-int init_server(server *);
+
+int fd_to_read(struct server *,fd_set *);
+int init_server(struct server *);
 
 int initialization(int);
 
-int parse(struct client_data*);
-int hello(struct client_data*, int indice);
-int getFishes(struct client_data*, int indice);
-int getFishesContinously(struct client_data*, int indice);
-int log_out(struct client_data*, int indice);
+int parse(struct client_data*, struct server*);
+int hello(struct client_data*, int indice, struct server*);
+int getFishes(struct client_data*, int indice, struct server *);
+int getFishesContinously(struct client_data*, int indice, struct server *);
+int log_out(struct client_data*, int indice, struct server *);
 int ping(struct client_data*, int indice);
-int status(struct client_data*, int indice);
-int addFish(struct client_data*, int indice);
-int delFish(struct client_data*, int indice);
-int startFish(struct client_data*, int indice);
-int read_client(struct client_data*);
+int status(struct client_data*, int indice, struct server *);
+int addFish(struct client_data*, int indice, struct server *);
+int delFish(struct client_data*, int indice, struct server *);
+int startFish(struct client_data*, int indice, struct server *);
+int read_client(struct client_data*, struct server *);
 
 
 
