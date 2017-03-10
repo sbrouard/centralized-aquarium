@@ -75,6 +75,7 @@ struct server{
 
 
 int fd_to_read(struct server *,fd_set *);
+int read_server(struct server *,fed_set *);
 int init_server(struct server *);
 
 int initialization(int);

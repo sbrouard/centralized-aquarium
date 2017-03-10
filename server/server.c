@@ -121,12 +121,9 @@ int init_server(struct server *t)
 	return 0;
 }
 
-int fd_to_read(struct server *serv,fd_set *set)
+int fd_to_read(server *serv,fd_set *set)
 {
 	int nfds = 0,i;
-
-	//on écoute le stdin
-	FD_SET(0,set);
 
 	if(serv->socket != -1)
 	{
@@ -143,6 +140,26 @@ int fd_to_read(struct server *serv,fd_set *set)
 	}
 
 	return nfds + 1;
+}
+
+int read_server(server *serv,fd_set *set)
+{
+	int i;
+
+	if(FD_ISSET(serv->socket,set))
+	{
+		//accept_client(serv);
+	}
+
+	for(i=0;i<serv->nb_client;i++)
+	{
+		if(FD_ISSET(serv->client_list[i].socket,set))
+		{
+			read_client(&serv->client_list[i]);
+		}
+	}
+
+	return 0;
 }
 
 int affect_available_view(struct server *s, struct client_data* client){
