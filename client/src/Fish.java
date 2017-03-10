@@ -1,4 +1,10 @@
-public class Fish{
+import java.awt.*;
+import javax.swing.*;
+import java.awt.event.*;
+import javax.imageio.*;
+import java.io.*;
+
+public class Fish extends JPanel{
 
     int pos_x;
     int pos_y;
@@ -6,7 +12,8 @@ public class Fish{
     int height;
     String name;
     String type;
-    
+    Image image;
+
     public Fish(String name, String type,int pos_x,int pos_y,int width,int height){
 	this.name = name;
 	this.type = type;
@@ -14,6 +21,11 @@ public class Fish{
 	this.pos_y = pos_y;
 	this.width = width;
 	this.height = height;
+	try{
+	    this.image = ImageIO.read(new File("fishes/magicarpe.png"));
+	} catch (IOException e){
+	    System.err.println("Cannot read image of type " + type);
+	}
     }
 
     public String getName(){
@@ -46,5 +58,11 @@ public class Fish{
 
     public void setPosY(int newPosY){
 	pos_y = newPosY;
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+	super.paintComponent(g);
+	g.drawImage(image, this.pos_x, this.pos_y, this.width , this.height, this);
     }
 }
