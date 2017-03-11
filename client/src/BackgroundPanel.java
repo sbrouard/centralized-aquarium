@@ -8,6 +8,7 @@ public class BackgroundPanel extends JPanel {
 
     public BackgroundPanel(Image image) {
 	this.image = image;
+	this.setLayout(null);
     }
 
     @Override
