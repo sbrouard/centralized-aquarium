@@ -73,5 +73,10 @@ public class Fish extends JPanel{
 	this.setBounds(this.pos_x, this.pos_y, this.width, this.height);
 	g.drawImage(image, 0, 0, this.width , this.height, this);
     }
+
+    @Override
+    public String toString(){
+	return "nom: " + name + " type: " + type + " pos: " + pos_x + ", " + pos_y + " taille: " + width + ", " + height;
+    }
     
 }

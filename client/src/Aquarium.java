@@ -30,12 +30,13 @@ public class Aquarium extends JFrame{
 	this.setUndecorated(true);
 	*/
 
+	/*
 	Fish magicarpe = new Fish("magicarpe", "magicarpe",-50 ,200 , 200, 200);
 	Fish magicarpe2 = new Fish("magicarpe2", "magicarpe", 50, 250, 300, 300);
 
 	this.add(magicarpe2);
 	this.add(magicarpe);
-
+	*/
 	
 	this.setExtendedState(JFrame.MAXIMIZED_BOTH);	
 
@@ -44,10 +45,11 @@ public class Aquarium extends JFrame{
 	try{
 	    TimeUnit.SECONDS.sleep(1);
 	} catch (Exception e){}
-	
+	/*
 	magicarpe.setPosX(0);
 	this.remove(magicarpe2);
 	this.repaint();
+	*/
 
     }
 
@@ -81,8 +83,10 @@ public class Aquarium extends JFrame{
 		}
 	    }
 
-	    if(toDel)
+	    if(toDel){
+		this.remove(fish1);
 		this.fishes.remove(fish1);
+	    }
 	}
     }
     
@@ -90,7 +94,13 @@ public class Aquarium extends JFrame{
 	for(Fish f : this.fishes){
 	    f.move();
 	}
+
 	this.repaint();
+
+	/* TO DEBUG
+	System.out.println("update");
+	System.out.println(this.fishes.toString());
+	*/
     }
 
     public static void main(String args[]){

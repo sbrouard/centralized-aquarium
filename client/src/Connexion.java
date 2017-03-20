@@ -54,9 +54,9 @@ public class Connexion implements Runnable {
 	    }
 	    
 	    Thread t2 = new Thread(new Emission(socket));
-	    //Thread t3 = new Thread(new Reception(socket));
+	    Thread t3 = new Thread(new Reception(socket));
 	    t2.start();
-	    //t3.start();
+	    t3.start();
 	    
 	} catch(IOException e){
 	    System.err.println("le serveur ne repond pas");

@@ -9,7 +9,7 @@ public class Client {
 	Thread t = null;
 	
 	try {
-	    ConfigParser cfg = new ConfigParser("../affichage.cfg");
+	    ConfigParser cfg = new ConfigParser("affichage.cfg");
 	    String address = cfg.getControllerAddress();
 	    int port = cfg.getControllerPort();
 	    socket = new Socket(address, port);
