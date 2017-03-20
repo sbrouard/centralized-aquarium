@@ -588,9 +588,23 @@ int parse_exit(terminal *term)
 //command functions
 void cmd_load(terminal *term)
 {
-	write(1,"loadind file : ",15);
-	write(1,term->split_cmd.str,term->split_cmd.length);
-	write(1,"\n",1);
+	char *filename;
+	int i;
+
+	filename = malloc(term->split_cmd.length+1); // + '\0'
+
+	for(i=0;i<term->split_cmd.length;i++)
+		filename[i] = term->split_cmd.str[i];
+
+	filename[i] = '\0';
+
+	if(parse_aquarium(filename,&(term->serv.aqua)))
+	{
+		printf("enable to parse this file\n");
+	}else
+		printf("Aquarium loaded\n");
+
+	free(filename);
 }
 
 void cmd_save(terminal *term)
@@ -602,9 +616,22 @@ void cmd_save(terminal *term)
 
 void cmd_show_aquarium(terminal *term)
 {
+	int i;
+
 	write(1,"   __\n",6);
 	write(1,"|\\/ *\\\n",7);
 	write(1,"|/\\__/\n",7);
+
+	printf("\n%dx%d\n",term->serv.aqua.size.width,term->serv.aqua.size.height);
+
+	for(i=0;i<term->serv.aqua.nb_views;i++)
+	{
+		printf("N%d %dx%d+%d+%d\n",i+1,
+			term->serv.aqua.views[i].pos.x,
+			term->serv.aqua.views[i].pos.y,
+			term->serv.aqua.views[i].size.width,
+			term->serv.aqua.views[i].size.height);
+	}
 }
 
 void cmd_add_view(terminal *term)

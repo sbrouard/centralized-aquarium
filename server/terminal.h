@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "server.h"
+#include "parse_aquarium.h"
 
 #define MAX_SIZE_CMD 6
 #define NO_MORE_READ 256
