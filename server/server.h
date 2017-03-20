@@ -20,6 +20,9 @@
 #define NOVIEW -1
 
 
+#define MAX_FISHES 1024
+
+
 struct coord{
   int x;
   int y;
@@ -35,15 +38,6 @@ struct view{
   int client;
   struct coord pos;
   struct dimensions size;
-
-};
-
-struct aquarium{
-  struct dimensions size;
-  struct view* views;
-  int nb_views;
-  struct fish* fishes;
-  int nb_fishes;
 };
 
 struct fish{
@@ -52,6 +46,15 @@ struct fish{
   char * mobility;
   struct coord pos;
 };
+
+struct aquarium{
+  struct dimensions size;
+  struct view* views;
+  int nb_views;
+  struct fish fishes[MAX_FISHES];
+  int nb_fishes;
+};
+
 
 struct controller{
   int port;

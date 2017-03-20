@@ -24,8 +24,6 @@ controller.cfg :
 	       		 -valeur timeout
 			 -intervalle mise a jour poissons
 		
-		parseur statique (lex)
-
 
 
 

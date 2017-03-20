@@ -39,7 +39,10 @@ int initialization(int port){
 
 
 
-//Parse la première partie d'une commande d'un client qui termine par '\n'
+
+
+
+//Parse la première partie d'une commande d'un client
 int parse(struct client_data* client, struct server* s){
   int i;
   for(i = 0; client->buffer[i] != '\n' || client->buffer[i] != ' '; ++i){
@@ -54,7 +57,7 @@ int parse(struct client_data* client, struct server* s){
   }
 
   else if (strncmp(client->buffer,"getFishesContinously",i) == 0){
-    getFishesContinously(client,i);
+    getFishesContinously(client,i,s);
   }
 
   else  if (strncmp(client->buffer,"log",i) == 0){
@@ -65,19 +68,19 @@ int parse(struct client_data* client, struct server* s){
     ping(client,i);
   }
   else if (strncmp(client->buffer,"status",i) == 0){
-    status(client,i);
+    status(client,i,s);
   }
   else if (strncmp(client->buffer,"addFish",i) == 0){
-    addFish(client,i);
+    addFish(client,i,s);
   }
   else if (strncmp(client->buffer,"delFish",i) == 0){
-    delFish(client,i);
+    delFish(client,i,s);
   }
   else if (strncmp(client->buffer,"startFish",i) == 0){
-    startFish(client,i);
+    startFish(client,i,s);
   }
   else{
-    char * unknown = "Unknown command\n";
+    char * unknown = "NOK : commande introuvable\n";
     send(client->socket,unknown, strlen(unknown),0);
   }
 
@@ -120,7 +123,7 @@ int init_server(struct server *t)
 	return 0;
 }
 
-int fd_to_read(server *serv,fd_set *set)
+int fd_to_read(struct server *serv,fd_set *set)
 {
 	int nfds = 0,i;
 
@@ -141,7 +144,7 @@ int fd_to_read(server *serv,fd_set *set)
 	return nfds + 1;
 }
 
-int read_server(server *serv,fd_set *set)
+int read_server(struct server *serv,fd_set *set)
 {
 	int i;
 
@@ -154,13 +157,14 @@ int read_server(server *serv,fd_set *set)
 	{
 		if(FD_ISSET(serv->client_list[i].socket,set))
 		{
-			read_client(&serv->client_list[i]);
+		  read_client(&serv->client_list[i], serv);
 		}
 	}
 
 	return 0;
 }
 
+//utilisee dans hello() pour factoriser l'affectation d'une vue a un client
 int affect_available_view(struct server *s, struct client_data* client){
   int j;
   char greet[12];
@@ -180,7 +184,7 @@ int affect_available_view(struct server *s, struct client_data* client){
 int hello(struct client_data* client, int indice, struct server * s){
   if  (client->buffer[indice] == ' '){ // Cas "in as N<ID>"
     int j;
-    char * unknown = "Unknown command\n";
+    char * unknown = "NOK : commande introuvable\n";
     char greet[12];
     if ( strncmp("in as N", &client->buffer[indice+1], 7)){ // chaine "in as" valable
       char c = client->buffer[indice+8];
@@ -224,27 +228,131 @@ int hello(struct client_data* client, int indice, struct server * s){
 
 
 
-int getFishes(struct client_data* client, int indice){return 0;}
-int getFishesContinously(struct client_data* client, int indice){return 0;}
+int getFishes(struct client_data* client, int indice, struct server* s){
+  if (client->buffer[indice] != '\n'){
+    char * unknown = "NOK : commande introuvable\n";
+    send(client->socket,unknown, strlen(unknown),0);
+  }
+  
+  else 
+    {
+      return 0;
+
+
+    }
+
+
+
+
+return 0;
+}
+
+
+int getFishesContinously(struct client_data* client, int indice, struct server * s){return 0;}
+
+
+
+
+
 //Cette fonction deconnecte un client
-int log_out(struct client_data* client, int indice){
+int log_out(struct client_data* client, int indice, struct server *s){
   //Si on a "log out\n"
   if(strncmp(" out\n", &client->buffer[indice], 5)){
     s->aqua.views[client->id_view].client = AVAILABLE;
     client->id_view = NOVIEW;
-    char * message = "bye\n"
+    char * message = "bye\n";
       send(client->socket,message, strlen(message),0);
   }
   else {
-    char * unknown = "Unknown command\n";
+    char * unknown = "NOK : commande introuvable\n";
     send(client->socket,unknown, strlen(unknown),0);
   }
   return 0;
 }
 
 int ping(struct client_data* client, int indice){return 0;}
-int status(struct client_data* client, int indice){return 0;}
-int addFish(struct client_data* client, int indice){return 0;}
-int delFish(struct client_data* client, int indice){return 0;}
-int startFish(struct client_data* client, int indice){return 0;}
+
+
+
+int addFish(struct client_data* client, int indice, struct server * s){return 0;}
+int delFish(struct client_data* client, int indice, struct server * s){return 0;}
+int startFish(struct client_data* client, int indice, struct server * s){return 0;}
+
+
+//envoie l'etat de la connexion (les poissons de la vue) avec le serveur au client
+int status(struct client_data* client, int indice, struct server* s){
+  if (client->buffer[indice] != '\n'){
+    char * unknown = "NOK : commande introuvable\n";
+    send(client->socket,unknown, strlen(unknown),0);
+  }
+
+  else {
+    char msg1[256];
+    char msg2[256];
+    int i;
+    int * tabfish = malloc(sizeof(int));
+    int len = findFishesOfView(&(s->aqua), client->id_view, tabfish);
+    sprintf(msg1, "OK : Connecte au controleur, %d poisson(s) trouve(s)\n", len);
+    send(client->socket,msg1, strlen(msg1),0);
+    for (i = 0 ; i < len; ++i){
+      sprintf(msg2, "Fish %s at %dx%d,%dx%d\n", s->aqua.fishes[tabfish[i]].name, trad_coorx(s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y),trad_coory(s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height);
+       send(client->socket,msg2,strlen(msg2),0);	      
+    }
+	
+    free(tabfish);
+}
+
+  return 0;
+}
+
+
+
+//remplit par effet de bord un tableau avec les indices des poissons de la vue
+int findFishesOfView(struct aquarium* a, int view, int *tabfish ){
+  int len = 0;
+  int i;
+  for (i = 0; i < a->nb_fishes; ++i){
+    
+    if (fishIsInView(a->fishes[i],a->views[view])){
+      ++len;
+      tabfish = realloc(tabfish,len);
+      tabfish[len-1] = i;
+    }
+	 }
+  return len;
+ 
+}
+
+
+//verifie si un poisson est dans une vue
+int fishIsInView(struct fish* f, struct view* v){
+  if (f->pos.x >= v->pos.x && f->pos.x <= v->pos.x + v->size.width && f->pos.y >= v->pos.y && f->pos.y <= v->pos.y + v->size.height)
+    return 1;
+  else 
+    return 0;
+}
+
+//Traduit une abscisse globale en abscisse locale % 
+int trad_coorx(struct aquarium *a,int view,int x){
+  int newx = x;
+  int i;
+  for (i = 0; i < view; ++i){
+    newx = newx - a->views[i].pos.x;
+  }
+
+  newx = (newx*100)/(a->views[view].size.width);
+  return newx;
+ }
+
+//Traduit une ordonnee globale en ordonnee locale % 
+int trad_coory(struct aquarium *a,int view, int y){
+  int newy = y;
+  int i;
+  for (i = 0; i < view; ++i){
+    newy = newy - a->views[i].pos.y;
+  }
+
+  newy = (newy*100)/(a->views[view].size.height);
+  return newy;
+ }
 
