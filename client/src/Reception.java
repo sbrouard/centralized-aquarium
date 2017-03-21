@@ -11,7 +11,7 @@ public class Reception implements Runnable {
     public Reception(Socket s){
 	socket = s;
 	aquarium = new Aquarium();
-	Thread t4 = new Thread(new Display(aquarium, 1));
+	Thread t4 = new Thread(new Display(aquarium, 100));
 	t4.start();
     }
 

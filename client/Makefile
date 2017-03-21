@@ -5,6 +5,10 @@ all: clean
 	javac -d build src/*.java tst/*.java
 	java -ea -cp build LancerTests $(TST)
 
+client: clean
+	javac -d build src/*.java tst/*.java
+	java -cp build Client
+
 aquarium: clean
 	javac -d build src/*.java tst/*.java
 	java -cp build Aquarium
