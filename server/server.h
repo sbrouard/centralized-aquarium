@@ -50,7 +50,7 @@ struct fish{
 struct aquarium{
   struct dimensions size;
   struct view* views;
-  int nb_views;
+  int nb_views,nb_views_allocated;
   struct fish fishes[MAX_FISHES];
   int nb_fishes;
 };
