@@ -8,17 +8,23 @@ public class Fish extends JPanel{
 
     int pos_x;
     int pos_y;
+    int toGo_x;
+    int toGo_y;
+    float time; // time to go to pos (toGo_x, toGo_y)
     int width;
     int height;
     String name;
     String type;
     Image image;
 
-    public Fish(String name, String type,int pos_x,int pos_y,int width,int height){
+    public Fish(String name, String type,int pos_x,int pos_y,int width,int height, float time){
 	this.name = name;
 	this.type = type;
 	this.pos_x = pos_x;
-	this.pos_y = pos_y;	
+	this.pos_y = pos_y;
+	this.toGo_x = pos_x;
+	this.toGo_y = pos_y;
+	this.time = time;
 	this.width = width;
 	this.height = height;
 	
@@ -64,9 +70,40 @@ public class Fish extends JPanel{
 	pos_y = newPosY;
     }
 
-    public void move(){
+    public void setTime(int time){
+	this.time = time;
     }
     
+    public int getTime(){
+	return this.time;
+    }
+
+    public int getToGoX(){
+	return this.toGo_x;
+    }
+
+    public int getToGoY(){
+	return this.toGo_y;
+    }
+
+    public void move(){
+	if(this.time > 0){
+	    this.pos_x = (this.toGo_x - this.pos_x) / this.time + this.pos_x;
+	    this.pos_y = (this.toGo_y - this.pos_y) / this.time + this.pos_y;
+	    this.time--;
+	}
+	else{
+	    this.pos_x = toGo_x;
+	    this.pos_y = toGo_y;
+	}
+    }
+    
+    public void updateFish(Fish newFish){
+	this.time = newFish.getTime();
+	this.toGo_x = newFish.getToGoX();
+	this.toGo_y = newFish.getToGoY();
+    }
+
     @Override
     public void paintComponent(Graphics g) {
 	super.paintComponent(g);

@@ -20,6 +20,6 @@ public class Display implements Runnable{
 		public void run() {
 		    aquarium.update();
 		}
-	    }, 0, timeUpdate, TimeUnit.SECONDS);
+	    }, 0, timeUpdate, TimeUnit.MILLISECONDS);
     }
 }

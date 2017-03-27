@@ -24,19 +24,6 @@ public class Aquarium extends JFrame{
 	} catch(IOException e){
 	    System.err.println("Cannot read background image");
 	}
-
-	// Uncomment to make the cross disappear.
-	/*
-	this.setUndecorated(true);
-	*/
-
-	/*
-	Fish magicarpe = new Fish("magicarpe", "magicarpe",-50 ,200 , 200, 200);
-	Fish magicarpe2 = new Fish("magicarpe2", "magicarpe", 50, 250, 300, 300);
-
-	this.add(magicarpe2);
-	this.add(magicarpe);
-	*/
 	
 	this.setExtendedState(JFrame.MAXIMIZED_BOTH);	
 
@@ -45,13 +32,10 @@ public class Aquarium extends JFrame{
 	try{
 	    TimeUnit.SECONDS.sleep(1);
 	} catch (Exception e){}
-	/*
-	magicarpe.setPosX(0);
-	this.remove(magicarpe2);
-	this.repaint();
-	*/
+	
 
     }
+
 
     public void setFishes(ArrayList<Fish> f){
 	
@@ -61,6 +45,7 @@ public class Aquarium extends JFrame{
 	    
 	    for(Fish fish2 : this.fishes){
 		if(fish2.getName().equals(fish1.getName())){
+		    fish2.updateFish(fish1);
 		    toAdd = false;
 		    break;
 		}

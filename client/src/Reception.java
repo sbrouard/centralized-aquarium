@@ -11,7 +11,7 @@ public class Reception implements Runnable {
     public Reception(Socket s){
 	socket = s;
 	aquarium = new Aquarium();
-	Thread t4 = new Thread(new Display(aquarium, 100));
+	Thread t4 = new Thread(new Display(aquarium, 50));
 	t4.start();
     }
 
@@ -57,7 +57,8 @@ public class Reception implements Runnable {
 			    int fishNewPosY = Integer.parseInt(fishNewCoords[1]); // "40"
 			    int fishWidth = Integer.parseInt(fishSize[0]); // "10"
 			    int fishHeight = Integer.parseInt(fishSize[1]); // "4"
-			    Fish newFish = new Fish(fishName, fishType, fishNewPosX, fishNewPosY, fishWidth, fishHeight);
+			    int time = Integer.parseInt(fishTime);
+			    Fish newFish = new Fish(fishName, fishType, fishNewPosX, fishNewPosY, fishWidth, fishHeight, time);
 			    fishes.add(newFish);
 			    System.out.println("Poissonn ajoute : " + fishes.toString());
 			}
