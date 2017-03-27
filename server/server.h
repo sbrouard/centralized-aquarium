@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
+
 #include "config.h"
 
 
@@ -19,8 +20,12 @@
 #define NOTAVAILABLE 1
 #define NOVIEW -1
 
+#define UNKNOWN_COMMAND 1
 
 #define MAX_FISHES 1024
+#define NAME_LENGTH 256
+
+#define DEFAULT_DURATION 5
 
 
 struct coord{
@@ -41,9 +46,9 @@ struct view{
 };
 
 struct fish{
-  char * name;
+  char name[NAME_LENGTH];
   struct dimensions size;
-  char * mobility;
+  char mobility[NAME_LENGTH];
   struct coord pos;
 };
 
@@ -56,11 +61,6 @@ struct aquarium{
 };
 
 
-struct controller{
-  int port;
-  int timeout;
-  int update_time;
-};
 
 struct client_data{
   int socket;

@@ -186,7 +186,7 @@ int hello(struct client_data* client, int indice, struct server * s){
     int j;
     char * unknown = "NOK : commande introuvable\n";
     char greet[12];
-    if ( strncmp("in as N", &client->buffer[indice+1], 7)){ // chaine "in as" valable
+    if ( strncmp("in as N\n", &client->buffer[indice+1], 8)){ // chaine "in as" valable
       char c = client->buffer[indice+8];
       int num = atoi(&c);
       if (num >= 0 && num <= s->aqua.nb_views){ // numero de vue valable
@@ -227,6 +227,29 @@ int hello(struct client_data* client, int indice, struct server * s){
 }
 
 
+//auxiliaire pour getFishes et getFishesContinously qui envoie la liste des poissons de la vue
+int sendFishesOfView(struct client_data* client, struct server* s){
+  char msg[4096];
+  int * tabfish = malloc(sizeof(int));
+  int len = findFishesOfView(&(s->aqua), client->id_view, tabfish);
+      if (len > 0){
+	sprintf(msg, "list");
+	for (int i = 0; i < len; i++){
+	  sprintf(msg+4, " [%s at %dx%d, %dx%d, %d]", s->aqua.fishes[tabfish[i]].name,trad_coorx(s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y),trad_coory(s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, DEFAULT_DURATION);
+	}
+	
+	strcat(msg, "\n");
+	send(client->socket, msg, strlen(msg),0);
+	
+	
+      }
+      else{
+	send(client->socket, "No fish\n", strlen("No fish\n"),0);
+      }
+      return 0;
+}
+
+
 
 int getFishes(struct client_data* client, int indice, struct server* s){
   if (client->buffer[indice] != '\n'){
@@ -236,6 +259,7 @@ int getFishes(struct client_data* client, int indice, struct server* s){
   
   else 
     {
+      sendFishesOfView(client,s);
       return 0;
 
 
@@ -243,12 +267,28 @@ int getFishes(struct client_data* client, int indice, struct server* s){
 
 
 
-
 return 0;
 }
 
 
-int getFishesContinously(struct client_data* client, int indice, struct server * s){return 0;}
+int getFishesContinously(struct client_data* client, int indice, struct server * s){
+   if (client->buffer[indice] != '\n'){
+     char * unknown = "NOK : commande introuvable\n";
+     send(client->socket,unknown, strlen(unknown),0);
+   }
+   else {
+     int t = s->conf.fish_update_interval;
+     while (1){
+       sleep(t);
+       sendFishesOfView(client,s);
+     }
+     
+
+   }
+
+
+return 0;
+}
 
 
 
@@ -270,11 +310,210 @@ int log_out(struct client_data* client, int indice, struct server *s){
   return 0;
 }
 
-int ping(struct client_data* client, int indice){return 0;}
+int ping(struct client_data* client, int indice){
+  char msg[1024];
+  sprintf(msg, "pong%s", &client->buffer[indice]);
+  send(client->socket,msg, strlen(msg),0);
+  return 0;
+}
+
+
+//retourne 0 si le nom du poisson est déjà pris, 1 sinon
+int alreadyExistsFish(struct server *s, const char * name){
+  
+
+  for (int i = 0; i < s->aqua.nb_fishes; ++i){
+    if (strcmp(name, s->aqua.fishes[i].name) == 1){
+      return 0;
+    }
+
+  }
+
+  return 1;
+    
+
+}
 
 
 
-int addFish(struct client_data* client, int indice, struct server * s){return 0;}
+int addFish(struct client_data* client, int indice, struct server * s){
+  char * unknown = "NOK : commande introuvable\n";
+
+
+
+  if (nb_fishes >= MAX_FISHES-1){
+      send(client->socket,"NOK\n",4,0);
+    return UNKNOWN_COMMAND;
+
+
+    }
+
+
+  if (client->buffer[indice] != ' '){ 
+    send(client->socket,unknown, strlen(unknown),0);
+    return UNKNOWN_COMMAND;
+  }
+  else {
+    struct fish f;
+    int i;
+    for (i = indice+1; client->buffer[i] != ' ' && i < client->buffer_size; ++i){
+}
+    int name_length = i-(indice+1);
+    if ( i >=  client->buffer_size ) { //Cas addFish + espace + \n
+            send(client->socket,unknown, strlen(unknown),0);
+	    return UNKNOWN_COMMAND;
+    }
+    else if (name_length <= NAME_LENGTH)  { // Vérification que le nom du poisson rentre dans la chaine de caractères
+      strncpy(f.name, &client->buffer[indice+1], name_length);
+      int exist = alreadyExistsFish(s,f.name);
+      if (exist){ // Cas nom poisson deja existant
+	send(client->socket, "NOK\n", 4);
+	return UNKNOWN_COMMAND
+      } 
+    }
+    else {
+      	send(client->-socket, "NOK\n", 4);
+	return UNKNOWN_COMMAND;
+    }
+    
+   
+    if(strncmp(" at ", &client->buffer[i], 4)){
+      i += 4;
+    }
+    else {
+      send(client->socket,unknown, strlen(unknown),0);
+      return UNKNOWN_COMMAND;
+    }
+    
+
+    //PARSING COORDONNEES DE POSITION
+    int j = 0;
+    int nb = 1;
+    char msg[3] = { '\0', '\0', '\0'};
+    int pos;
+    for ( ;client->buffer[i] != ',' && i < client->buffer_size; ++i){
+      if (client->buffer[i] != 'x' && j < 3){
+	msg[j] = client->buffer[i];
+	++j;
+      }
+      else if (client->buffer[i] == 'x' && j != 0 && nb == 1){
+	pos = atoi(msg);
+	++nb;
+	if ( pos >= 0 && pos <= 100){
+	  f.pos.x = pos;
+	  j = 0;
+	  for (int c = 0; c < 3; ++c){
+	    msg[c] = '\0';
+	  }
+	}
+      }
+
+      else if (nb == 2 && j < 3){
+	msg[j] = client->buffer[i];
+	++j;
+      }
+
+      else if (nb == 2 && client->buffer[i+1] == ',' && j != 0){
+	pos = atoi(msg);
+	if ( pos >= 0 && pos <= 100){
+	  f.pos.y = pos;
+      }
+
+      else{
+	send(client->socket,unknown, strlen(unknown),0);
+	return UNKNOWN_COMMAND;
+	}
+       
+	
+    }
+
+    if (i >= client->buffer_size){
+      	send(client->socket,unknown, strlen(unknown),0);
+	return UNKNOWN_COMMAND;
+
+    }
+
+
+    //PARSING DIMENSIONS
+    
+
+    j = 0;
+    nb = 1;
+    char msg2[3] = { '\0', '\0', '\0'};
+    for ( ;client->buffer[i] != ',' && i < client->buffer_size; ++i){
+      if (client->buffer[i] != 'x' && j < 3){
+	msg2[j] = client->buffer[i];
+	++j;
+      }
+      else if (client->buffer[i] == 'x' && j != 0 && nb == 1){
+	pos = atoi(msg2);
+	++nb;
+	if ( pos >= 0 && pos <= 100){
+	  f.size.width = pos;
+	  j = 0;
+	  for (int c = 0; c < 3; ++c){
+	    msg2[c] = '\0';
+	  }
+	}
+      }
+
+      else if (nb == 2 && j < 3){
+	msg2[j] = client->buffer[i];
+	++j;
+      }
+
+      else if (nb == 2 && client->buffer[i+1] == ',' && j != 0){
+	pos = atoi(msg2);
+	if ( pos >= 0 && pos <= 100){
+	  f.size.height = pos;
+      }
+
+      else{
+	send(client->socket,unknown, strlen(unknown),0);
+	return UNKNOWN_COMMAND;
+	}
+       
+	
+    }
+
+    if (i >= client->buffer_size){
+      	send(client->socket,unknown, strlen(unknown),0);
+	return UNKNOWN_COMMAND;
+
+    }
+
+    //PARSING MOBILITE
+    if ( client->buffer[i+1] != ' '){
+      	send(client->socket,unknown, strlen(unknown),0);
+	return UNKNOWN_COMMAND;
+    }
+    
+    
+    char mobility[NAME_LENGTH];
+    j = 0;
+    
+    for (i+=2; client->buffer[i] != '\n' && j < NAME_LENGTH; ++i){
+      mobility[j] = client->buffer[i];
+      ++j;
+    }
+    
+    if (j >= NAME_LENGTH){
+      send(client->socket,unknown, strlen(unknown),0);
+      return UNKNOWN_COMMAND;	
+    }
+      
+    strcpy(f.mobility, mobility);
+    
+
+    s->aqua.fish[s->aqua.nb_fishes] = f;
+    ++s->aqua.nb_fishes;
+   
+    
+    
+
+return 0;
+}
+
 int delFish(struct client_data* client, int indice, struct server * s){return 0;}
 int startFish(struct client_data* client, int indice, struct server * s){return 0;}
 
