@@ -26,6 +26,8 @@ int init_terminal(terminal *term)
 	term->cv.pos_y = -1;
 	term->cv.width = -1;
 	term->cv.height = -1;
+
+	printf(">");
 }
 
 void zero_str_arg(str_arg *str)
@@ -97,7 +99,7 @@ int syntax_error(char *error, terminal *term)
 
 	for(i=0;i<term->caracter_count;i++)
 		printf(" ");
-	printf("^\n");
+	printf(" ^\n");
 	printf("Syntax error : %s\n",error);
 	term->function = flush_cmd;
 	term->cv.pos_x = -1;
@@ -118,6 +120,7 @@ void read_terminal(terminal *term)
 			term->state = 0;
 			term->command_length = 0;
 			term->caracter_count = 0;
+			write(1,">",1);
 		}else
 			return;
 	}
@@ -139,6 +142,7 @@ void read_terminal(terminal *term)
 						term->state = 0;
 						term->command_length = 0;
 						term->caracter_count = 0;
+						write(1,">",1);
 					}else
 						return;
 				}else
@@ -150,6 +154,7 @@ void read_terminal(terminal *term)
 						term->state = 0;
 						term->command_length = 0;
 						term->caracter_count = 0;
+						write(1,">",1);
 					}else
 						return;
 				}
@@ -170,6 +175,7 @@ void read_terminal(terminal *term)
 				term->state = 0;
 				term->command_length = 0;
 				term->caracter_count = 0;
+				write(1,">",1);
 			}else
 				return;
 		}
@@ -441,6 +447,12 @@ int parse_del_view(terminal *term)
 
 int parse_add_view(terminal *term)
 {
+
+	term->cv.pos_x = 0;
+	term->cv.pos_y = 0;
+	term->cv.width = 0;
+	term->cv.height = 0;
+
 	switch(term->state)
 	{
 		case 1:
@@ -631,7 +643,7 @@ void cmd_save(terminal *term)
 		for(i=0;i<term->serv.aqua.nb_views;i++)
 		{
 			write(file,"N",1);
-			write(file,number,sprintf(number,"%d",i));
+			write(file,number,sprintf(number,"%d",i+1));
 			write(file," ",1);
 			write(file,number,sprintf(number,"%d",term->serv.aqua.views[i].pos.x));
 			write(file,"x",1);
@@ -747,6 +759,8 @@ void cmd_del_view(terminal *term)
 	{
 		term->serv.aqua.views[i-1] = term->serv.aqua.views[i];
 	}
+
+	printf("view N%d deleted\n",n);
 
 	term->serv.aqua.nb_views--;
 }
