@@ -6,16 +6,17 @@ import java.io.*;
 
 public class Fish extends JPanel{
 
-    int pos_x;
-    int pos_y;
-    int toGo_x;
-    int toGo_y;
-    float time; // time to go to pos (toGo_x, toGo_y)
-    int width;
-    int height;
-    String name;
-    String type;
-    Image image;
+    private int pos_x;
+    private int pos_y;
+    private int toGo_x;
+    private int toGo_y;
+    private float time; // time to go to pos (toGo_x, toGo_y)
+    private int width;
+    private int height;
+    private String name;
+    private String type;
+    private Image image;
+    private int nbTimesUpdated;
 
     public Fish(String name, String type,int pos_x,int pos_y,int width,int height, float time){
 	this.name = name;
@@ -74,7 +75,7 @@ public class Fish extends JPanel{
 	this.time = time;
     }
     
-    public int getTime(){
+    public float getTime(){
 	return this.time;
     }
 
@@ -87,21 +88,35 @@ public class Fish extends JPanel{
     }
 
     public void move(){
-	if(this.time > 0){
-	    this.pos_x = (this.toGo_x - this.pos_x) / this.time + this.pos_x;
-	    this.pos_y = (this.toGo_y - this.pos_y) / this.time + this.pos_y;
-	    this.time--;
+
+	if(this.pos_x != this.toGo_x && this.time != 0){
+	    this.pos_x = (int)(((float)(this.toGo_x - this.pos_x) / (this.time*1000))*50*(nbTimesUpdated+1)) + this.pos_x;
 	}
-	else{
+
+	if(this.pos_y != this.toGo_y && this.time != 0){
+	    this.pos_y = (int)(((float)(this.toGo_y - this.pos_y) / (this.time*1000))*50*(nbTimesUpdated+1)) + this.pos_y;
+	}
+
+	if(this.pos_x == this.toGo_x || this.time == 0){
 	    this.pos_x = toGo_x;
+	}
+
+	if(this.pos_y == this.toGo_y || this.time == 0){
 	    this.pos_y = toGo_y;
 	}
+	
+	System.out.println(this.pos_x + " " + this.pos_y);
+	
+	this.nbTimesUpdated++;
     }
     
     public void updateFish(Fish newFish){
-	this.time = newFish.getTime();
-	this.toGo_x = newFish.getToGoX();
-	this.toGo_y = newFish.getToGoY();
+	if(this.toGo_x != newFish.getToGoX() || this.toGo_y != newFish.getToGoY()){
+	    this.time = newFish.getTime();
+	    this.toGo_x = newFish.getToGoX();
+	    this.toGo_y = newFish.getToGoY();
+	    this.nbTimesUpdated = 0;
+	}
     }
 
     @Override
