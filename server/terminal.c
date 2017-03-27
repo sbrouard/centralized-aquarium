@@ -609,9 +609,49 @@ void cmd_load(terminal *term)
 
 void cmd_save(terminal *term)
 {
-	write(1,"saving file : ",14);
-	write(1,term->split_cmd.str,term->split_cmd.length);
-	write(1,"\n",1);
+	char *filename,number[16];
+	int i,file;
+
+	filename = malloc(term->split_cmd.length+1); // + '\0'
+
+	for(i=0;i<term->split_cmd.length;i++)
+		filename[i] = term->split_cmd.str[i];
+
+	filename[i] = '\0';
+
+	file = open(filename,O_WRONLY|O_CREAT,S_IRWXU);
+
+	if(file != -1)
+	{
+		write(file,number,sprintf("%d",term->serv.aqua.size.width));
+		write(file,1,"x");
+		write(file,number,sprintf("%d",term->serv.aqua.size.height));
+		write(file,1,"\n");
+
+		for(i=0;i<term->serv.aqua.nb_views;i++)
+		{
+			write(file,1,"N");
+			write(file,number,sprintf("%d",i));
+			write(file,1," ");
+			write(file,number,term->serv.aqua.views[i].pos.x);
+			write(file,1,"x");
+			write(file,number,term->serv.aqua.views[i].pos.y);
+			write(file,1,"+");
+			write(file,number,term->serv.aqua.views[i].size.width);
+			write(file,1,"+");
+			write(file,number,term->serv.aqua.views[i].size.height);
+			write(file,1,"\n");
+
+		}
+		printf("Aquarium saved !(%d display view)\n",i);
+		close(file);
+	}else
+	{
+		perror("open()");
+		printf("can't open file\n");
+	}
+
+	free(filename);
 }
 
 void cmd_show_aquarium(terminal *term)
