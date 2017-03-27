@@ -69,7 +69,6 @@ int parse_aquarium(char *filename,struct aquarium *aq)
 
 	cur.next_char = NO_CHAR;
 	cur.file = open(filename,O_RDONLY);
-	nb_alloc = START_ALLOC_NB_VIEW;
 
 	if(cur.file == -1)
 	{
@@ -77,7 +76,14 @@ int parse_aquarium(char *filename,struct aquarium *aq)
 		return 1;
 	}
 
-	aq->views = (struct view*)malloc(sizeof(struct view)*nb_alloc);
+	if(aq->nb_views_allocated == 0)
+	{
+		nb_alloc = START_ALLOC_NB_VIEW;
+		aq->views = (struct view*)malloc(sizeof(struct view)*nb_alloc);
+	}else
+	{
+		nb_alloc = aq->nb_views_allocated;
+	}	
 	aq->nb_views = 0;
 	aq->nb_fishes = 0;
 

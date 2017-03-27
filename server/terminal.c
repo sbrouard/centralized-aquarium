@@ -676,22 +676,79 @@ void cmd_show_aquarium(terminal *term)
 
 void cmd_add_view(terminal *term)
 {
-	write(1,"adding view : ",14);
-	write(1,term->cv.id.str,term->cv.id.length);
-	write(1,"\n",1);
+	int i,n;
 	
-	printf("pos x : %d\n",term->cv.pos_x);
-	printf("pos y : %d\n",term->cv.pos_y);
-	printf("width : %d\n",term->cv.width);
-	printf("height : %d\n",term->cv.height);
+	if(term->cv.id.str[0] != 'N')
+	{
+		printf("invalid view name\n");
+		printf("you must use view N%d\n",term->serv.aqua.nb_views+1);
+		return;
+	}
 
+	for(i=1,n=0;i<term->cv.id.length;i++)
+	{
+		if(term->cv.id.str[i] < '0' || term->cv.id.str[i] > '9')
+		{
+			printf("invalid view name\n");
+			printf("you must use view N%d\n",term->serv.aqua.nb_views+1);
+			return;
+		}
+		n = n*10 + term->cv.id.str[i]-'0';
+	}
+
+	if(n != term->serv.aqua.nb_views+1)
+	{
+		printf("view name doesn't exist\n");
+		printf("you must use view N%d\n",term->serv.aqua.nb_views+1);
+		return;
+	}
+
+	if(term->serv.aqua.nb_views == term->serv.aqua.nb_views_allocated)
+	{
+		term->serv.aqua.nb_views_allocated *= 2;	
+		term->serv.aqua.views = realloc(term->serv.aqua.views,term->serv.aqua.nb_views_allocated);
+	}
+
+	term->serv.aqua.views[term->serv.aqua.nb_views].size.width = term->cv.width;
+	term->serv.aqua.views[term->serv.aqua.nb_views].size.height = term->cv.height;
+	term->serv.aqua.views[term->serv.aqua.nb_views].pos.x = term->cv.pos_x;
+	term->serv.aqua.views[term->serv.aqua.nb_views].pos.y = term->cv.pos_y;
+	term->serv.aqua.nb_views++;
+	printf("view N%d added\n",n);
 }
 
 void cmd_del_view(terminal *term)
-{
-	write(1,"deleting view : ",16);
-	write(1,term->cv.id.str,term->cv.id.length);
-	write(1,"\n",1);
+{	
+	int i,n;
+	
+	if(term->cv.id.str[0] != 'N')
+	{
+		printf("invalid view name\n");
+		return;
+	}
+
+	for(i=1,n=0;i<term->cv.id.length;i++)
+	{
+		if(term->cv.id.str[i] < '0' || term->cv.id.str[i] > '9')
+		{
+			printf("invalid view name\n");
+			return;
+		}
+		n = n*10 + term->cv.id.str[i]-'0';
+	}
+
+	if(n > term->serv.aqua.nb_views || n < 1)
+	{
+		printf("view name doesn't exist\n");
+		return;
+	}
+
+	for(i=n;i<term->serv.aqua.nb_views;i++)
+	{
+		term->serv.aqua.views[i-1] = term->serv.aqua.views[i];
+	}
+
+	term->serv.aqua.nb_views--;
 }
 
 void cmd_launch(terminal *term)
