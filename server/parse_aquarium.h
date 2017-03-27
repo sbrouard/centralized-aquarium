@@ -12,6 +12,7 @@
 typedef struct cursor{
 	int file;
 	int next_char;
+	int pos,line;
 }cursor;
 
 int parse_aquarium(char *filename,struct aquarium *aq);
