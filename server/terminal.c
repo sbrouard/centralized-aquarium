@@ -623,24 +623,24 @@ void cmd_save(terminal *term)
 
 	if(file != -1)
 	{
-		write(file,number,sprintf("%d",term->serv.aqua.size.width));
-		write(file,1,"x");
-		write(file,number,sprintf("%d",term->serv.aqua.size.height));
-		write(file,1,"\n");
+		write(file,number,sprintf(number,"%d",term->serv.aqua.size.width));
+		write(file,"x",1);
+		write(file,number,sprintf(number,"%d",term->serv.aqua.size.height));
+		write(file,"\n",1);
 
 		for(i=0;i<term->serv.aqua.nb_views;i++)
 		{
-			write(file,1,"N");
-			write(file,number,sprintf("%d",i));
-			write(file,1," ");
-			write(file,number,term->serv.aqua.views[i].pos.x);
-			write(file,1,"x");
-			write(file,number,term->serv.aqua.views[i].pos.y);
-			write(file,1,"+");
-			write(file,number,term->serv.aqua.views[i].size.width);
-			write(file,1,"+");
-			write(file,number,term->serv.aqua.views[i].size.height);
-			write(file,1,"\n");
+			write(file,"N",1);
+			write(file,number,sprintf(number,"%d",i));
+			write(file," ",1);
+			write(file,number,sprintf(number,"%d",term->serv.aqua.views[i].pos.x));
+			write(file,"x",1);
+			write(file,number,sprintf(number,"%d",term->serv.aqua.views[i].pos.y));
+			write(file,"+",1);
+			write(file,number,sprintf(number,"%d",term->serv.aqua.views[i].size.width));
+			write(file,"+",1);
+			write(file,number,sprintf(number,"%d",term->serv.aqua.views[i].size.height));
+			write(file,"\n",1);
 
 		}
 		printf("Aquarium saved !(%d display view)\n",i);
