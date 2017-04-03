@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #define DEFAULT_CONTROLLER_PORT 12345
 #define DEFAULT_DISPLAY_TIMEOUT 45

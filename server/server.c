@@ -411,11 +411,11 @@ int addFish(struct client_data* client, int indice, struct server * s){
     send(client->socket,unknown, strlen(unknown),0);
     return UNKNOWN_COMMAND;
   }
-  else {
+
     struct fish f;
     int i;
-    for (i = indice+1; client->buffer[i] != ' ' && i < client->buffer_size; ++i){
-}
+    for (i = indice+1; client->buffer[i] != ' ' && i < client->buffer_size; ++i){}
+
     int name_length = i-(indice+1);
     if ( i >=  client->buffer_size ) { //Cas addFish + espace + \n
             send(client->socket,unknown, strlen(unknown),0);
@@ -484,7 +484,7 @@ int addFish(struct client_data* client, int indice, struct server * s){
        
 	
     }
-
+}
     if (i >= client->buffer_size){
       	send(client->socket,unknown, strlen(unknown),0);
 	return UNKNOWN_COMMAND;
@@ -533,7 +533,7 @@ int addFish(struct client_data* client, int indice, struct server * s){
        
 	
     }
-
+}
     if (i >= client->buffer_size){
       	send(client->socket,unknown, strlen(unknown),0);
 	return UNKNOWN_COMMAND;

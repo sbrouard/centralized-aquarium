@@ -1,5 +1,21 @@
 #include "parse_aquarium.h"
 
+int next_char_aqua(cursor *cur)
+{
+	char c;
+
+	if(cur->next_char == NO_CHAR)
+	{
+		if(read(cur->file,&c,1) != 1)
+		{
+			cur->next_char = END_OF_FILE;
+		}else
+			cur->next_char = c;
+	}	
+	
+	return cur->next_char;
+}
+
 int get_char_aqua(cursor *cur)
 {
 	int c;
@@ -16,22 +32,6 @@ int get_char_aqua(cursor *cur)
 		cur->pos ++;
 
 	return c;
-}
-
-int next_char_aqua(cursor *cur)
-{
-	char c;
-
-	if(cur->next_char == NO_CHAR)
-	{
-		if(read(cur->file,&c,1) != 1)
-		{
-			cur->next_char = END_OF_FILE;
-		}else
-			cur->next_char = c;
-	}	
-	
-	return cur->next_char;
 }
 
 int read_number(cursor *cur, int *nbr)

@@ -68,5 +68,6 @@ void cmd_show_aquarium(terminal *term);
 void cmd_add_view(terminal *term);
 void cmd_del_view(terminal *term);
 void cmd_launch(terminal *term);
+int init_terminal(terminal *term);
 
 #endif
