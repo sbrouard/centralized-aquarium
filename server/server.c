@@ -164,6 +164,60 @@ int read_server(struct server *serv,fd_set *set)
 	return 0;
 }
 
+
+
+
+//Traduit une abscisse globale en abscisse locale % 
+int trad_coorx(struct aquarium *a,int view,int x){
+  int newx = x;
+  int i;
+  for (i = 0; i < view; ++i){
+    newx = newx - a->views[i].pos.x;
+  }
+
+  newx = (newx*100)/(a->views[view].size.width);
+  return newx;
+ }
+
+//Traduit une ordonnee globale en ordonnee locale % 
+int trad_coory(struct aquarium *a,int view, int y){
+  int newy = y;
+  int i;
+  for (i = 0; i < view; ++i){
+    newy = newy - a->views[i].pos.y;
+  }
+
+  newy = (newy*100)/(a->views[view].size.height);
+  return newy;
+ }
+
+//verifie si un poisson est dans une vue
+int fishIsInView(struct fish* f, struct view* v){
+  if (f->pos.x >= v->pos.x && f->pos.x <= v->pos.x + v->size.width && f->pos.y >= v->pos.y && f->pos.y <= v->pos.y + v->size.height)
+    return 1;
+  else 
+    return 0;
+}
+
+
+//remplit par effet de bord un tableau avec les indices des poissons de la vue
+int findFishesOfView(struct aquarium* a, int view, int *tabfish ){
+  int len = 0;
+  int i;
+  for (i = 0; i < a->nb_fishes; ++i){
+    
+    if (fishIsInView(&a->fishes[i],&a->views[view])){
+      ++len;
+      tabfish = realloc(tabfish,len);
+      tabfish[len-1] = i;
+    }
+	 }
+  return len;
+ 
+}
+
+
+
 //utilisee dans hello() pour factoriser l'affectation d'une vue a un client
 int affect_available_view(struct server *s, struct client_data* client){
   int j;
@@ -235,7 +289,7 @@ int sendFishesOfView(struct client_data* client, struct server* s){
       if (len > 0){
 	sprintf(msg, "list");
 	for (int i = 0; i < len; i++){
-	  sprintf(msg+4, " [%s at %dx%d, %dx%d, %d]", s->aqua.fishes[tabfish[i]].name,trad_coorx(s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y),trad_coory(s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, DEFAULT_DURATION);
+	  sprintf(msg+4, " [%s at %dx%d, %dx%d, %d]", s->aqua.fishes[tabfish[i]].name,trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y),trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, DEFAULT_DURATION);
 	}
 	
 	strcat(msg, "\n");
@@ -246,6 +300,10 @@ int sendFishesOfView(struct client_data* client, struct server* s){
       else{
 	send(client->socket, "No fish\n", strlen("No fish\n"),0);
       }
+
+
+      free(tabfish);
+
       return 0;
 }
 
@@ -318,18 +376,18 @@ int ping(struct client_data* client, int indice){
 }
 
 
-//retourne 0 si le nom du poisson est déjà pris, 1 sinon
+//retourne l'indice dans le tableau des poissons si le nom du poisson est déjà pris, 1 sinon
 int alreadyExistsFish(struct server *s, const char * name){
   
-
-  for (int i = 0; i < s->aqua.nb_fishes; ++i){
+  int i;
+  for (i = 0; i < s->aqua.nb_fishes; ++i){
     if (strcmp(name, s->aqua.fishes[i].name) == 1){
       return 0;
     }
 
   }
 
-  return 1;
+  return i;
     
 
 }
@@ -341,7 +399,7 @@ int addFish(struct client_data* client, int indice, struct server * s){
 
 
 
-  if (nb_fishes >= MAX_FISHES-1){
+  if (s->aqua.nb_fishes >= MAX_FISHES-1){
       send(client->socket,"NOK\n",4,0);
     return UNKNOWN_COMMAND;
 
@@ -367,12 +425,12 @@ int addFish(struct client_data* client, int indice, struct server * s){
       strncpy(f.name, &client->buffer[indice+1], name_length);
       int exist = alreadyExistsFish(s,f.name);
       if (exist){ // Cas nom poisson deja existant
-	send(client->socket, "NOK\n", 4);
-	return UNKNOWN_COMMAND
+	send(client->socket, "NOK\n", 4,0);
+	return UNKNOWN_COMMAND;
       } 
     }
     else {
-      	send(client->-socket, "NOK\n", 4);
+      send(client->socket, "NOK\n", 4,0);
 	return UNKNOWN_COMMAND;
     }
     
@@ -505,7 +563,7 @@ int addFish(struct client_data* client, int indice, struct server * s){
     strcpy(f.mobility, mobility);
     
 
-    s->aqua.fish[s->aqua.nb_fishes] = f;
+    s->aqua.fishes[s->aqua.nb_fishes] = f;
     ++s->aqua.nb_fishes;
    
     
@@ -514,8 +572,56 @@ int addFish(struct client_data* client, int indice, struct server * s){
 return 0;
 }
 
-int delFish(struct client_data* client, int indice, struct server * s){return 0;}
-int startFish(struct client_data* client, int indice, struct server * s){return 0;}
+int delFish(struct client_data* client, int indice, struct server * s){
+
+    char * unknown = "NOK : commande introuvable\n";
+  if (client->buffer[indice] != ' '){ 
+    send(client->socket,unknown, strlen(unknown),0);
+    return UNKNOWN_COMMAND;
+  }
+  else {
+    struct fish f;
+    int i;
+    for (i = indice+1; client->buffer[i] != '\n'; ++i){}
+
+    int name_length = i-(indice+1);
+    
+    if (name_length <= NAME_LENGTH)  { // Vérification que le nom du poisson rentre dans la chaine de caractères
+      strncpy(f.name, &client->buffer[indice+1], name_length);
+      int exist = alreadyExistsFish(s,f.name);
+      if (!exist){ // Cas poisson inexistant
+	send(client->socket, "NOK : Poisson inexistant\n", 25,0);
+	return UNKNOWN_COMMAND;
+      }
+      else{
+	for (int j = exist; j < s->aqua.nb_fishes-1 ; ++j){
+	  s->aqua.fishes[j] = s->aqua.fishes[j+1];
+	}
+	--s->aqua.nb_fishes;
+      }
+    }
+    else {
+      send(client->socket, "NOK\n", 4,0);
+	return UNKNOWN_COMMAND;
+    }
+  }
+  return 0;
+}
+int startFish(struct client_data* client, int indice, struct server * s){
+  char * unknown = "NOK : commande introuvable\n";
+  if (client->buffer[indice] != '\n'){ 
+    send(client->socket,unknown, strlen(unknown),0);
+    return UNKNOWN_COMMAND;
+  }
+  else {
+    
+    send(client->socket,"OK\n",3,0);
+  }
+  
+
+
+return 0;
+}
 
 
 //envoie l'etat de la connexion (les poissons de la vue) avec le serveur au client
@@ -534,7 +640,7 @@ int status(struct client_data* client, int indice, struct server* s){
     sprintf(msg1, "OK : Connecte au controleur, %d poisson(s) trouve(s)\n", len);
     send(client->socket,msg1, strlen(msg1),0);
     for (i = 0 ; i < len; ++i){
-      sprintf(msg2, "Fish %s at %dx%d,%dx%d\n", s->aqua.fishes[tabfish[i]].name, trad_coorx(s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y),trad_coory(s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height);
+      sprintf(msg2, "Fish %s at %dx%d,%dx%d\n", s->aqua.fishes[tabfish[i]].name, trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y),trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height);
        send(client->socket,msg2,strlen(msg2),0);	      
     }
 	
@@ -545,53 +651,4 @@ int status(struct client_data* client, int indice, struct server* s){
 }
 
 
-
-//remplit par effet de bord un tableau avec les indices des poissons de la vue
-int findFishesOfView(struct aquarium* a, int view, int *tabfish ){
-  int len = 0;
-  int i;
-  for (i = 0; i < a->nb_fishes; ++i){
-    
-    if (fishIsInView(a->fishes[i],a->views[view])){
-      ++len;
-      tabfish = realloc(tabfish,len);
-      tabfish[len-1] = i;
-    }
-	 }
-  return len;
- 
-}
-
-
-//verifie si un poisson est dans une vue
-int fishIsInView(struct fish* f, struct view* v){
-  if (f->pos.x >= v->pos.x && f->pos.x <= v->pos.x + v->size.width && f->pos.y >= v->pos.y && f->pos.y <= v->pos.y + v->size.height)
-    return 1;
-  else 
-    return 0;
-}
-
-//Traduit une abscisse globale en abscisse locale % 
-int trad_coorx(struct aquarium *a,int view,int x){
-  int newx = x;
-  int i;
-  for (i = 0; i < view; ++i){
-    newx = newx - a->views[i].pos.x;
-  }
-
-  newx = (newx*100)/(a->views[view].size.width);
-  return newx;
- }
-
-//Traduit une ordonnee globale en ordonnee locale % 
-int trad_coory(struct aquarium *a,int view, int y){
-  int newy = y;
-  int i;
-  for (i = 0; i < view; ++i){
-    newy = newy - a->views[i].pos.y;
-  }
-
-  newy = (newy*100)/(a->views[view].size.height);
-  return newy;
- }
 
