@@ -34,10 +34,12 @@ int main(int argc, char **argv)
 		}
 		gettimeofday(&t2,NULL);
 		sec = t2.tv_sec - t1.tv_sec;
+		read_terminal(&term);
 
 		if(term.serv.update_fishes.tv_sec < sec)
 		{
-			//moveFishes(&term.serv);
+			printf("zefqsd %d\n",term.serv.aqua.nb_fishes);
+			moveFishes(&term.serv);
 			term.serv.update_fishes.tv_sec = INTERVAL_UPDATE_FISHES;
 			term.serv.update_fishes.tv_usec = 0;
 		}else
@@ -47,7 +49,7 @@ int main(int argc, char **argv)
 			{
 				if(term.serv.update_fishes.tv_sec == 0)
 				{
-					//moveFishes(&term.serv);
+					moveFishes(&term.serv);
 					term.serv.update_fishes.tv_sec = INTERVAL_UPDATE_FISHES;
 					term.serv.update_fishes.tv_usec = 0;
 				}else
@@ -98,6 +100,5 @@ int main(int argc, char **argv)
 		}
 
 		read_server(&term.serv,&read_fds);
-		read_terminal(&term);
 	}
 }
