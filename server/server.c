@@ -203,6 +203,9 @@ int trad_coory(struct aquarium *a,int view, int y){
   return newy;
  }
 
+
+
+
 //verifie si un poisson est dans une vue
 int fishIsInView(struct fish* f, struct view* v){
   if (f->pos.x >= v->pos.x && f->pos.x <= v->pos.x + v->size.width && f->pos.y >= v->pos.y && f->pos.y <= v->pos.y + v->size.height)
@@ -301,7 +304,11 @@ int sendFishesOfView(struct client_data* client, struct server* s){
       if (len > 0){
 	sprintf(msg, "list");
 	for (int i = 0; i < len; i++){
-	  sprintf(msg+4, " [%s at %dx%d, %dx%d, %d]", s->aqua.fishes[tabfish[i]].name,trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y),trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, DEFAULT_DURATION);
+	  sprintf(msg+4, " [%s at %dx%d,%dx%d,%d]",
+		  s->aqua.fishes[tabfish[i]].name,
+		  trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.x),
+		  trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), 
+		  s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, DEFAULT_DURATION);
 	}
 	
 	strcat(msg, "\n");
@@ -448,7 +455,7 @@ int addFish(struct client_data* client, int indice, struct server * s){
     }
     
     if(strncmp(" at ", &client->buffer[i], 4) == 0){
-TEST      
+   
 i += 4;
     }
     else {
@@ -462,8 +469,8 @@ i += 4;
     int nb = 1;
     char msg[3] = { '\0', '\0', '\0'};
     int pos;
-    for ( ;client->buffer[i] != ',' && i < client->buffer_size; ++i){
-      if (client->buffer[i] != 'x' && j < 3){
+    for ( ;client->buffer[i] != ' ' && i < client->buffer_size; ++i){
+      if (client->buffer[i] != 'x' && j < 3 && nb == 1){
 	msg[j] = client->buffer[i];
 	++j;
       }
@@ -472,6 +479,7 @@ i += 4;
 	++nb;
 	if ( pos >= 0 && pos <= 100){
 	  f.pos.x = pos;
+	  printf("posx %d\n", f.pos.x);
 	  j = 0;
 	  for (int c = 0; c < 3; ++c){
 	    msg[c] = '\0';
@@ -479,15 +487,16 @@ i += 4;
 	}
       }
 
-      else if (nb == 2 && j < 3){
+      else if (nb == 2 && j < 3 && client->buffer[i] != ','){
 	msg[j] = client->buffer[i];
 	++j;
       }
 
-      else if (nb == 2 && client->buffer[i+1] == ',' && j != 0){
+      else if (nb == 2 && client->buffer[i] == ',' && j != 0){
 	pos = atoi(msg);
 	if ( pos >= 0 && pos <= 100){
 	  f.pos.y = pos;
+	  printf("posy %d\n", f.pos.y);
       }
 
       else{
@@ -510,9 +519,10 @@ i += 4;
 
     j = 0;
     nb = 1;
+    ++i;
     char msg2[3] = { '\0', '\0', '\0'};
-    for ( ;client->buffer[i] != ',' && i < client->buffer_size; ++i){
-      if (client->buffer[i] != 'x' && j < 3){
+    for ( ;client->buffer[i] != ' ' && i < client->buffer_size; ++i){
+      if (client->buffer[i] != 'x' && j < 3 && nb == 1){
 	msg2[j] = client->buffer[i];
 	++j;
       }
@@ -521,6 +531,7 @@ i += 4;
 	++nb;
 	if ( pos >= 0 && pos <= 100){
 	  f.size.width = pos;
+	  printf("sizewidth %d\n", f.size.width);
 	  j = 0;
 	  for (int c = 0; c < 3; ++c){
 	    msg2[c] = '\0';
@@ -528,15 +539,16 @@ i += 4;
 	}
       }
 
-      else if (nb == 2 && j < 3){
+      else if (nb == 2 && j < 3 && client->buffer[i] != ','){
 	msg2[j] = client->buffer[i];
 	++j;
       }
 
-      else if (nb == 2 && client->buffer[i+1] == ',' && j != 0){
+      else if (nb == 2 && client->buffer[i] == ',' && j != 0){
 	pos = atoi(msg2);
 	if ( pos >= 0 && pos <= 100){
 	  f.size.height = pos;
+	  printf("sizeheight %d\n", f.size.height);
       }
 
       else{
@@ -554,7 +566,7 @@ i += 4;
     }
 
     //PARSING MOBILITE
-    if ( client->buffer[i+1] != ' '){
+    if ( client->buffer[i] != ' '){
       	send(client->socket,unknown, strlen(unknown),0);
 	return UNKNOWN_COMMAND;
     }
@@ -563,7 +575,7 @@ i += 4;
     char mobility[NAME_LENGTH];
     j = 0;
     
-    for (i+=2; client->buffer[i] != '\n' && j < NAME_LENGTH; ++i){
+    for (i+=1; client->buffer[i] != '\n' && j < NAME_LENGTH; ++i){
       mobility[j] = client->buffer[i];
       ++j;
     }
@@ -574,8 +586,9 @@ i += 4;
     }
       
     strcpy(f.mobility, mobility);
-    
-
+    printf("mobi %s\n", f.mobility);
+    f.isStarted = 0;
+ 
     s->aqua.fishes[s->aqua.nb_fishes] = f;
     ++s->aqua.nb_fishes;
    
@@ -620,20 +633,42 @@ int delFish(struct client_data* client, int indice, struct server * s){
   }
   return 0;
 }
+
+
+
+
 int startFish(struct client_data* client, int indice, struct server * s){
-  char * unknown = "NOK : commande introuvable\n";
-  if (client->buffer[indice] != '\n'){ 
+
+    char * unknown = "NOK : commande introuvable\n";
+  if (client->buffer[indice] != ' '){ 
     send(client->socket,unknown, strlen(unknown),0);
     return UNKNOWN_COMMAND;
   }
   else {
+    struct fish f;
+    int i;
+    for (i = indice+1; client->buffer[i] != '\n'; ++i){}
+
+    int name_length = i-(indice+1);
     
-    send(client->socket,"OK\n",3,0);
+    if (name_length <= NAME_LENGTH)  { // Vérification que le nom du poisson rentre dans la chaine de caractères
+      strncpy(f.name, &client->buffer[indice+1], name_length);
+      int exist = alreadyExistsFish(s,f.name);
+      if (!exist){ // Cas poisson inexistant
+	send(client->socket, "NOK : Poisson inexistant\n", 25,0);
+	return UNKNOWN_COMMAND;
+      }
+      else{
+	s->aqua.fishes[exist].isStarted = 1;
+
+      }
+    }
+    else {
+      send(client->socket, "NOK\n", 4,0);
+	return UNKNOWN_COMMAND;
+    }
   }
-  
-
-
-return 0;
+  return 0;
 }
 
 
@@ -653,7 +688,13 @@ int status(struct client_data* client, int indice, struct server* s){
     sprintf(msg1, "OK : Connecte au controleur, %d poisson(s) trouve(s)\n", len);
     send(client->socket,msg1, strlen(msg1),0);
     for (i = 0 ; i < len; ++i){
-      sprintf(msg2, "Fish %s at %dx%d,%dx%d\n", s->aqua.fishes[tabfish[i]].name, trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y),trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height);
+      sprintf(msg2, "Fish %s at %dx%d,%dx%d\n", 
+	      s->aqua.fishes[tabfish[i]].name,
+	      trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.x),
+	      trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y),
+	      s->aqua.fishes[tabfish[i]].size.width,  
+	      s->aqua.fishes[tabfish[i]].size.height);
+
        send(client->socket,msg2,strlen(msg2),0);	      
     }
 	
@@ -664,4 +705,37 @@ int status(struct client_data* client, int indice, struct server* s){
 }
 
 
+struct coord RandomWayPoint(struct server *s){
+  int x = rand() % (s->aqua.size.width);
+  int y = rand() % (s->aqua.size.height);
+  struct coord newpos;
+  newpos.x = x;
+  newpos.y = y;
+  return newpos;
+}
 
+int moveFishes(struct server *s){
+  for (int i = 0; i < s->aqua.nb_fishes; ++i){
+    if (s->aqua.fishes[i].isStarted){
+      moveFish(&s->aqua.fishes[i],s);
+    }
+
+  }
+
+  return 0;
+}
+
+
+int moveFish(struct fish *f, struct server *s){
+  if (strcmp(f->mobility,"RandomWayPoint") == 0){
+    struct coord newpos = RandomWayPoint(s); 
+    f->pos.x = newpos.x;
+    f->pos.y = newpos.y;
+    return 0;
+  }
+  else {
+    printf("Unknown mobility %s\n", f->mobility);
+    return -1;
+  }
+
+}

@@ -48,6 +48,7 @@ public class Emission implements Runnable {
 	    while(true){
 		cmd = sc.nextLine();
 		out.println(cmd);
+		out.flush();
 	    }
 	} catch (IOException e){
 	    System.err.println("le serveur ne répond pas");

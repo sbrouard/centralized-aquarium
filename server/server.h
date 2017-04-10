@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <sys/select.h>
+#include <time.h>
 
 #include "config.h"
 
@@ -51,6 +52,7 @@ struct fish{
   struct dimensions size;
   char mobility[NAME_LENGTH];
   struct coord pos;
+  int isStarted;
 };
 
 struct aquarium{
@@ -95,7 +97,8 @@ int delFish(struct client_data*, int indice, struct server *);
 int startFish(struct client_data*, int indice, struct server *);
 int read_client(struct client_data*, struct server *);
 
-
+int moveFishes(struct server *);
+int moveFish(struct fish *, struct server *);
 
 
 
