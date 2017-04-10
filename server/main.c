@@ -27,18 +27,21 @@ int main(int argc, char **argv)
 		nfds = fd_to_read(&term.serv,&read_fds,&timeout);
 		
 		gettimeofday(&t1,NULL);
-		if(select(nfds,&read_fds,NULL,NULL,NULL) == -1)
+		if(select(nfds,&read_fds,NULL,NULL,&timeout) == -1)
 		{
 			perror("select()");
 			return 1;
 		}
 		gettimeofday(&t2,NULL);
 		sec = t2.tv_sec - t1.tv_sec;
+		usec = t2.tv_usec - t1.tv_usec;
 		read_terminal(&term);
 
+		if(term.serv.socket != -1)
+		{
 		if(term.serv.update_fishes.tv_sec < sec)
 		{
-			printf("zefqsd %d\n",term.serv.aqua.nb_fishes);
+		  printf("Les poissons bougent\n");
 			moveFishes(&term.serv);
 			term.serv.update_fishes.tv_sec = INTERVAL_UPDATE_FISHES;
 			term.serv.update_fishes.tv_usec = 0;
@@ -49,6 +52,7 @@ int main(int argc, char **argv)
 			{
 				if(term.serv.update_fishes.tv_sec == 0)
 				{
+				   printf("Les poissons bougent\n");
 					moveFishes(&term.serv);
 					term.serv.update_fishes.tv_sec = INTERVAL_UPDATE_FISHES;
 					term.serv.update_fishes.tv_usec = 0;
@@ -63,6 +67,7 @@ int main(int argc, char **argv)
 			{
 				term.serv.update_fishes.tv_usec -= usec;
 			}
+		}
 		}
 
 		for(i=0;i<term.serv.nb_client;i++)

@@ -417,18 +417,18 @@ int ping(struct client_data* client, int indice){
 }
 
 
-//retourne l'indice dans le tableau des poissons si le nom du poisson est déjà pris, 1 sinon
+//retourne l'indice dans le tableau des poissons si le nom du poisson est déjà pris, -1 sinon
 int alreadyExistsFish(struct server *s, const char * name){
   
   int i;
   for (i = 0; i < s->aqua.nb_fishes; ++i){
-    if (strcmp(name, s->aqua.fishes[i].name) == 1){
-      return 0;
+    if (strcmp(name, s->aqua.fishes[i].name) == 0){
+      return i;
     }
 
   }
 
-  return i;
+  return -1;
     
 
 }
@@ -464,8 +464,9 @@ int addFish(struct client_data* client, int indice, struct server * s){
     }
     else if (name_length <= NAME_LENGTH)  { // Vérification que le nom du poisson rentre dans la chaine de caractères
       strncpy(f.name, &client->buffer[indice+1], name_length);
+        f.name[name_length] = '\0';
       int exist = alreadyExistsFish(s,f.name);
-      if (exist){ // Cas nom poisson deja existant
+      if (exist != -1){ // Cas nom poisson deja existant
 	send(client->socket, "NOK\n", 4,0);
 	return UNKNOWN_COMMAND;
       } 
@@ -636,8 +637,9 @@ int delFish(struct client_data* client, int indice, struct server * s){
     
     if (name_length <= NAME_LENGTH)  { // Vérification que le nom du poisson rentre dans la chaine de caractères
       strncpy(f.name, &client->buffer[indice+1], name_length);
+      f.name[name_length] = '\0';e
       int exist = alreadyExistsFish(s,f.name);
-      if (!exist){ // Cas poisson inexistant
+      if (exist == -1){ // Cas poisson inexistant
 	send(client->socket, "NOK : Poisson inexistant\n", 25,0);
 	return UNKNOWN_COMMAND;
       }
@@ -675,8 +677,11 @@ int startFish(struct client_data* client, int indice, struct server * s){
     
     if (name_length <= NAME_LENGTH)  { // Vérification que le nom du poisson rentre dans la chaine de caractères
       strncpy(f.name, &client->buffer[indice+1], name_length);
+      f.name[name_length] = '\0';
       int exist = alreadyExistsFish(s,f.name);
-      if (!exist){ // Cas poisson inexistant
+      printf("exist%s\n",f.name);
+      printf("exist%d\n",exist);
+      if (exist == -1){ // Cas poisson inexistant
 	send(client->socket, "NOK : Poisson inexistant\n", 25,0);
 	return UNKNOWN_COMMAND;
       }
@@ -733,6 +738,7 @@ struct coord RandomWayPoint(struct server *s){
   struct coord newpos;
   newpos.x = x;
   newpos.y = y;
+  printf("%d %d\n",x,y);
   return newpos;
 }
 
@@ -753,6 +759,7 @@ int moveFish(struct fish *f, struct server *s){
     struct coord newpos = RandomWayPoint(s); 
     f->pos.x = newpos.x;
     f->pos.y = newpos.y;
+   
     return 0;
   }
   else {
