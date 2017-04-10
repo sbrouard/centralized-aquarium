@@ -9,21 +9,28 @@ public class Fish extends JPanel{
 
     private int pos_x;
     private int pos_y;
+    
     private int toGo_x;
     private int toGo_y;
+    
     private int from_x;
     private int from_y;
+   
     private float time; // time to go to pos (toGo_x, toGo_y)
+    
     private int width;
     private int height;
+    
     private String name;
-    private String type;
     private Image image;
+    
     private int nbTimesUpdated;
+    
+    private double screenSizeHeight;
+    private double screenSizeWidth;
 
-    public Fish(String name, String type,int pos_x,int pos_y,int width,int height, float time){
+    public Fish(String name, int pos_x, int pos_y, int width, int height, float time){
 	this.name = name;
-	this.type = type;
 	this.pos_x = pos_x;
 	this.pos_y = pos_y;
 	this.toGo_x = pos_x;
@@ -35,23 +42,33 @@ public class Fish extends JPanel{
 	this.height = height;
 	this.nbTimesUpdated = 0;
 	
-	try{
-	    this.image = ImageIO.read(new File("fishes/magicarpe.png"));
-	} catch (IOException e){
-	    System.err.println("Cannot read image of type " + type);
-	}
-
+	String[] type = name.split("_");
+	setImage(type[0]);
+		
 	this.setBounds(this.pos_x, this.pos_y, this.width, this.height);
 	this.setOpaque(false);
+
+    }
+    
+    private void setImage(String type){
+	try{
+	    if("magicarpe".equals(type)){
+		this.image = ImageIO.read(new File("fishes/magicarpe.png"));	    
+	    }
+	} catch (IOException e){
+	    System.err.println("Cannot read image " + type + ".png");
+	}
+    }
+
+    public void setScreenSize(Dimension dim){
+	this.screenSizeHeight = dim.getHeight();
+	this.screenSizeWidth = dim.getWidth();
     }
 
     public String getName(){
 	return name;
     }
 
-    public String getType(){
-	return type;
-    }
 
     public int getPosX(){
 	return pos_x;
@@ -113,7 +130,7 @@ public class Fish extends JPanel{
 	    this.from_y = this.pos_y;
 	}
 	
-	System.out.println(this.pos_x + " " + this.pos_y);
+	//System.out.println(this.pos_x + " " + this.pos_y);
 	
 	this.nbTimesUpdated++;
     }
@@ -144,13 +161,14 @@ public class Fish extends JPanel{
     @Override
     public void paintComponent(Graphics g) {
 	super.paintComponent(g);
-	this.setBounds(this.pos_x, this.pos_y, this.width, this.height);
-	g.drawImage(image, 0, 0, this.width , this.height, this);
+	this.setBounds((this.pos_x*(int) this.screenSizeWidth)/100, (this.pos_y*(int) this.screenSizeHeight)/100, 
+		       (this.width*(int) this.screenSizeWidth)/100, (this.height*(int) this.screenSizeHeight)/100);
+	g.drawImage(image, 0, 0, (this.width*(int) this.screenSizeWidth)/100, (this.height*(int) this.screenSizeHeight)/100, this);
     }
 
     @Override
     public String toString(){
-	return "nom: " + name + " type: " + type + " pos: " + pos_x + ", " + pos_y + " taille: " + width + ", " + height;
+	return "nom: " + name + " pos: " + pos_x + ", " + pos_y + " taille: " + width + ", " + height;
     }
     
 }

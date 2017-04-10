@@ -45,7 +45,6 @@ public class Reception implements Runnable {
 			return false;
 		    else{
 			String fishName = fishInfos[0]; //"GoldFish"
-			String fishType = (fishName.split("_"))[0];
 			String[] fishValues = fishInfos[2].split(","); //"92x40";"10x4";"5"
 			if(fishValues.length != 3)
 			    return false;
@@ -58,7 +57,7 @@ public class Reception implements Runnable {
 			    int fishWidth = Integer.parseInt(fishSize[0]); // "10"
 			    int fishHeight = Integer.parseInt(fishSize[1]); // "4"
 			    int time = Integer.parseInt(fishTime);
-			    Fish newFish = new Fish(fishName, fishType, fishNewPosX, fishNewPosY, fishWidth, fishHeight, time);
+			    Fish newFish = new Fish(fishName, fishNewPosX, fishNewPosY, fishWidth, fishHeight, time);
 			    fishes.add(newFish);
 			    System.out.println("Poissonn ajoute : " + fishes.toString());
 			}
