@@ -158,6 +158,7 @@ int parse_aquarium(char *filename,struct aquarium *aq)
 		if(read_number(&cur,&aq->views[aq->nb_views].size.height))
 			return syntax_error_aqua(&cur,"expected number",aq);
 
+		aq->views[aq->nb_views].client = AVAILABLE;
 		aq->nb_views++;
 	}
 }
