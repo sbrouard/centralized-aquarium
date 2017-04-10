@@ -69,6 +69,9 @@ public class Reception implements Runnable {
 		// pong
 	    case "pong":
 		return true;
+		//bye
+	    case "bye":
+		return true;
 		//else: error
 	    default:
 		return false;
