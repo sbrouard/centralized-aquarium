@@ -52,6 +52,7 @@ public class Aquarium extends JFrame{
 	    }
 	    
 	    if(toAdd){
+		fish1.setScreenSize(this.getContentPane().getSize());
 		this.fishes.add(fish1);
 		this.add(fish1);
 	    }
@@ -78,8 +79,8 @@ public class Aquarium extends JFrame{
     public void update(){
 	for(Fish f : this.fishes){
 	    f.move();
+	    System.out.println(f);
 	}
-
 	this.repaint();
 
 	/* TO DEBUG

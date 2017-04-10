@@ -7,6 +7,7 @@ int init_client(struct client_data *c, int sock)
   c->socket = sock;
   c->id_view = -1;//PAS ENCORE PRIS EN COMPTE
   c->buffer_size = 0;
+  c->update_continuously = 0;
 }
 
 
@@ -123,11 +124,13 @@ int init_server(struct server *t)
 	t->socket = -1;
 	t->nb_client = 0;
 	t->client_list = NULL;
+	t->update_fishes.tv_sec = INTERVAL_UPDATE_FISHES;
+	t->update_fishes.tv_usec = 0;
 
 	return 0;
 }
 
-int fd_to_read(struct server *serv,fd_set *set)
+int fd_to_read(struct server *serv,fd_set *set,struct timeval *timeout)
 {
 	int nfds = 0,i;
 
@@ -137,12 +140,31 @@ int fd_to_read(struct server *serv,fd_set *set)
 		FD_SET(serv->socket,set);
 	}
 
+	timeout->tv_sec = serv->update_fishes.tv_sec;
+	timeout->tv_usec = serv->update_fishes.tv_usec;
+
 	for(i=0;i<serv->nb_client;i++)
 	{
 		FD_SET(serv->client_list[i].socket,set);
 
 		if(serv->client_list[i].socket > nfds)
 			nfds = serv->client_list[i].socket;
+
+		if(serv->client_list[i].update_continuously)
+		{
+			if(serv->client_list[i].give_continuously.tv_sec < timeout->tv_sec)
+			{
+				timeout->tv_sec = serv->client_list[i].give_continuously.tv_sec;
+				timeout->tv_usec = serv->client_list[i].give_continuously.tv_usec;
+			}else if(serv->client_list[i].give_continuously.tv_sec == timeout->tv_sec)
+			{
+				if(timeout->tv_usec < serv->client_list[i].give_continuously.tv_usec)
+				{
+					timeout->tv_usec = serv->client_list[i].give_continuously.tv_usec;
+				}
+
+			}
+		}
 	}
 
 	return nfds + 1;

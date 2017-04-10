@@ -1,0 +1,14 @@
+To do:
+
+* log out
+* ping (envoie automatique toutes les x sec)
+* coordonnées en %
+* 2 thread: emission et reception -> pas de connexion
+* lecture de l'image en fonction du nom (donc type) du poisson
+* Concurrence (?)
+* Autre fonction de déplacement ? (pas indispensable)
+* Tests automatiques ? (parce que c'est chiant de le faire à la main à chaque fois)
+* poisson dirigé vers sa direction ? :D
+* 3D !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
++ Correction rapport

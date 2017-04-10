@@ -29,6 +29,8 @@
 
 #define DEFAULT_DURATION 5
 
+#define INTERVAL_UPDATE_FISHES 3
+
 
 struct coord{
   int x;
@@ -70,6 +72,9 @@ struct client_data{
   int id_view;
   char buffer[MAX_SIZE_COMMAND];
   int buffer_size;
+  int update_continuously;
+  struct timeval give_continuously;
+  struct timeval last_activity;
 };
 
 struct server{
@@ -78,10 +83,11 @@ struct server{
   int nb_client;
   struct aquarium aqua;
   struct server_config conf;
+  struct timeval update_fishes;
 };
 
 
-int fd_to_read(struct server *,fd_set *);
+int fd_to_read(struct server *,fd_set *,struct timeval *timeout);
 int read_server(struct server *,fd_set *);
 int init_server(struct server *);
 
