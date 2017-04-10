@@ -27,7 +27,9 @@ int init_terminal(terminal *term)
 	term->cv.width = -1;
 	term->cv.height = -1;
 
-	printf(">");
+	parse_config_file(&term->serv.conf);
+
+	write(1,">",1);
 }
 
 void zero_str_arg(str_arg *str)
@@ -126,8 +128,8 @@ void read_terminal(terminal *term)
 	}
 
 	while(next_char(term) != NO_MORE_READ)
-	{
-		if(next_char(term) == ' ' || next_char(term) == '\n')
+		{
+			if(next_char(term) == ' ' || next_char(term) == '\n')
 		{
 			if(term->command_length > 0)
 			{
@@ -162,6 +164,7 @@ void read_terminal(terminal *term)
 			{
 				get_char(term);
 				term->caracter_count = 0;
+				write(1,">",1);
 			}
 		}else
 		{
