@@ -1,53 +1,22 @@
 #include "server.h"
 
+#define TEST {printf("test\n");fflush(0);}
 
-
-//Crée et retourne la socket d'écoute du serveur
-int initialization(int port){
-  int socket_server;
-  struct sockaddr_in server_ref;  
-
-  socket_server = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
-  if(socket_server == -1)
-	{
-		perror("socket()");
-		return -1;
-	}
-  
-  
-
-
-  server_ref.sin_family = AF_INET;
-  server_ref.sin_port = htons(port);
-  server_ref.sin_addr.s_addr = htonl(INADDR_ANY);
-
-  if(bind(socket_server,(struct sockaddr*)&server_ref,sizeof(struct sockaddr_in)) == -1)
-	{
-		perror("bind()");
-		return -1;
-	}
-  
-  
-  if(listen(socket_server,MAX_VIEWS) == -1)
-	{
-		perror("listen()");
-		return -1;
-	}
-
-  return socket_server;
+int init_client(struct client_data *c, int sock)
+{
+  c->socket = sock;
+  c->id_view = -1;//PAS ENCORE PRIS EN COMPTE
+  c->buffer_size = 0;
 }
-
-
 
 
 
 
 //Parse la première partie d'une commande d'un client
 int parse(struct client_data* client, struct server* s){
-  int i;
-  for(i = 0; client->buffer[i] != '\n' || client->buffer[i] != ' '; ++i){
+int i;
+  for(i = 0; client->buffer[i] != '\n' && client->buffer[i] != ' '; ++i){
   }
-  
   if (strncmp(client->buffer,"hello",i) == 0){
     hello(client,i,s);
   }
@@ -86,23 +55,58 @@ int parse(struct client_data* client, struct server* s){
 
 }
 
+int remove_client(struct client_data* client, struct server *s)
+{
+	int i;
 
+	close(client->socket);
+
+	for(i=0;i<s->nb_client;i++)
+	{
+		if(client == &s->client_list[i])
+			break;
+	}
+
+	if(i == s->nb_client)
+		return -1;
+
+	s->nb_client--;
+
+	for(;i<s->nb_client;i++)
+		s->client_list[i] = s->client_list[i+1];
+
+	return 0;
+}
 
 
 
 
 //Lit sur la socket du client jusqu'au bout du bloc reçu et appelle parse si on reçoit '\n'
 int read_client(struct client_data* client, struct server *s){
-  while (recv(client->socket,&client->buffer[client->buffer_size],1,MSG_DONTWAIT) != -1){
+	int res;
+
+	res = recv(client->socket,&client->buffer[client->buffer_size],1,MSG_DONTWAIT);
+
+
+	
+  while (res != -1){
+
+	if(res == 0)
+	{
+		printf("client disconnected\n");
+		remove_client(client,s);
+		return 0;
+	}
 
       if (client->buffer[client->buffer_size] == '\n'){
+	++client->buffer_size;
 	parse(client,s);
 	client->buffer_size = 0;
       }else
 	{
 	++client->buffer_size;
 	}
-
+	res = recv(client->socket,&client->buffer[client->buffer_size],1,MSG_DONTWAIT);
   }
 
   if(errno != EWOULDBLOCK)
@@ -147,10 +151,18 @@ int fd_to_read(struct server *serv,fd_set *set)
 int read_server(struct server *serv,fd_set *set)
 {
 	int i;
+	struct sockaddr_in client_in;
+	int size;
 
 	if(FD_ISSET(serv->socket,set))
 	{
-		//accept_client(serv);
+		printf("client accepted\n");
+		if(serv->client_list == NULL)
+		{
+			serv->client_list = malloc(sizeof(struct client_data)*serv->conf.max_client);
+		}
+		init_client(&serv->client_list[serv->nb_client],accept(serv->socket,(struct sockaddr*)&client_in,&size));
+		serv->nb_client++;
 	}
 
 	for(i=0;i<serv->nb_client;i++)
@@ -222,14 +234,14 @@ int findFishesOfView(struct aquarium* a, int view, int *tabfish ){
 int affect_available_view(struct server *s, struct client_data* client){
   int j;
   char greet[12];
-  for (j = 0; j < s->aqua.nb_views || s->aqua.views[j].client == AVAILABLE; ++j){}
+  for (j = 0; j < s->aqua.nb_views && s->aqua.views[j].client != AVAILABLE; ++j){}
   if (j ==  s->aqua.nb_views){
     return -1;
   }
   else {
     s->aqua.views[j].client = NOTAVAILABLE;
     client->id_view = j;
-    sprintf(greet, "greeting N%d\n", j);
+    sprintf(greet, "greeting N%d\n", j+1);
     send(client->socket,greet, strlen(greet),0);
     return 1;
   }
@@ -355,7 +367,7 @@ return 0;
 //Cette fonction deconnecte un client
 int log_out(struct client_data* client, int indice, struct server *s){
   //Si on a "log out\n"
-  if(strncmp(" out\n", &client->buffer[indice], 5)){
+  if(strncmp(" out\n", &client->buffer[indice-1], 5)){
     s->aqua.views[client->id_view].client = AVAILABLE;
     client->id_view = NOVIEW;
     char * message = "bye\n";
@@ -428,15 +440,16 @@ int addFish(struct client_data* client, int indice, struct server * s){
 	send(client->socket, "NOK\n", 4,0);
 	return UNKNOWN_COMMAND;
       } 
+	printf("nom poisson:%s\n",f.name);
     }
     else {
       send(client->socket, "NOK\n", 4,0);
 	return UNKNOWN_COMMAND;
     }
     
-   
-    if(strncmp(" at ", &client->buffer[i], 4)){
-      i += 4;
+    if(strncmp(" at ", &client->buffer[i], 4) == 0){
+TEST      
+i += 4;
     }
     else {
       send(client->socket,unknown, strlen(unknown),0);

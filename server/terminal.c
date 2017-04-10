@@ -794,4 +794,5 @@ void cmd_launch(terminal *term)
 		term->serv.socket = -1;
 		return;
 	}
+	printf("server launched\n");
 }

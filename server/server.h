@@ -83,8 +83,6 @@ int fd_to_read(struct server *,fd_set *);
 int read_server(struct server *,fd_set *);
 int init_server(struct server *);
 
-int initialization(int);
-
 int parse(struct client_data*, struct server*);
 int hello(struct client_data*, int indice, struct server*);
 int getFishes(struct client_data*, int indice, struct server *);
