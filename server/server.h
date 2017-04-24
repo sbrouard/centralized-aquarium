@@ -102,6 +102,8 @@ int addFish(struct client_data*, int indice, struct server *);
 int delFish(struct client_data*, int indice, struct server *);
 int startFish(struct client_data*, int indice, struct server *);
 int read_client(struct client_data*, struct server *);
+int sendFishesOfView(struct client_data*,struct server *);
+
 
 int moveFishes(struct server *);
 int moveFish(struct fish *, struct server *);

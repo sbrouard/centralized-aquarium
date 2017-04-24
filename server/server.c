@@ -158,7 +158,7 @@ int fd_to_read(struct server *serv,fd_set *set,struct timeval *timeout)
 				timeout->tv_usec = serv->client_list[i].give_continuously.tv_usec;
 			}else if(serv->client_list[i].give_continuously.tv_sec == timeout->tv_sec)
 			{
-				if(timeout->tv_usec < serv->client_list[i].give_continuously.tv_usec)
+				if(timeout->tv_usec > serv->client_list[i].give_continuously.tv_usec)
 				{
 					timeout->tv_usec = serv->client_list[i].give_continuously.tv_usec;
 				}
@@ -376,13 +376,7 @@ int getFishesContinously(struct client_data* client, int indice, struct server *
      send(client->socket,unknown, strlen(unknown),0);
    }
    else {
-     int t = s->conf.fish_update_interval;
-     while (1){
-       sleep(t);
-       sendFishesOfView(client,s);
-     }
-     
-
+     client->update_continuously = 1;
    }
 
 
@@ -637,7 +631,7 @@ int delFish(struct client_data* client, int indice, struct server * s){
     
     if (name_length <= NAME_LENGTH)  { // Vérification que le nom du poisson rentre dans la chaine de caractères
       strncpy(f.name, &client->buffer[indice+1], name_length);
-      f.name[name_length] = '\0';e
+      f.name[name_length] = '\0';
       int exist = alreadyExistsFish(s,f.name);
       if (exist == -1){ // Cas poisson inexistant
 	send(client->socket, "NOK : Poisson inexistant\n", 25,0);
@@ -679,14 +673,13 @@ int startFish(struct client_data* client, int indice, struct server * s){
       strncpy(f.name, &client->buffer[indice+1], name_length);
       f.name[name_length] = '\0';
       int exist = alreadyExistsFish(s,f.name);
-      printf("exist%s\n",f.name);
-      printf("exist%d\n",exist);
       if (exist == -1){ // Cas poisson inexistant
 	send(client->socket, "NOK : Poisson inexistant\n", 25,0);
 	return UNKNOWN_COMMAND;
       }
       else{
 	s->aqua.fishes[exist].isStarted = 1;
+	printf("%s started\n",f.name);
 
       }
     }
