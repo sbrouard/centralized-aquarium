@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 			{
 				if(term.serv.client_list[i].give_continuously.tv_sec < sec)
 				{
-					printf("send fishes continuously\n");
+					printf("send fishes continuously2 %d\n",term.serv.conf.fish_update_interval);
        					sendFishesOfView(&term.serv.client_list[i],&term.serv);
 					term.serv.client_list[i].give_continuously.tv_sec = term.serv.conf.fish_update_interval;
 					term.serv.client_list[i].give_continuously.tv_usec = 0;
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 					{
 						if(term.serv.client_list[i].give_continuously.tv_sec == 0)
 						{
-							printf("send fishes continuously\n");
+							printf("send fishes continuously %d\n",term.serv.conf.fish_update_interval);
        							sendFishesOfView(&term.serv.client_list[i],&term.serv);
 							term.serv.client_list[i].give_continuously.tv_sec = term.serv.conf.fish_update_interval;
 							term.serv.client_list[i].give_continuously.tv_usec = 0;

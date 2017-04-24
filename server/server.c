@@ -158,7 +158,7 @@ int fd_to_read(struct server *serv,fd_set *set,struct timeval *timeout)
 				timeout->tv_usec = serv->client_list[i].give_continuously.tv_usec;
 			}else if(serv->client_list[i].give_continuously.tv_sec == timeout->tv_sec)
 			{
-				if(timeout->tv_usec < serv->client_list[i].give_continuously.tv_usec)
+				if(timeout->tv_usec > serv->client_list[i].give_continuously.tv_usec)
 				{
 					timeout->tv_usec = serv->client_list[i].give_continuously.tv_usec;
 				}
