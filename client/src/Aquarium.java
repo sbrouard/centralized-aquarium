@@ -79,7 +79,7 @@ public class Aquarium extends JFrame{
     public void update(){
 	for(Fish f : this.fishes){
 	    f.move();
-	    System.out.println(f);
+	    //System.out.println(f);
 	}
 	this.repaint();
 
@@ -88,9 +88,4 @@ public class Aquarium extends JFrame{
 	System.out.println(this.fishes.toString());
 	*/
     }
-
-    public static void main(String args[]){
-	new Aquarium();
-    }
-
 }

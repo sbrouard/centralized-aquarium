@@ -59,7 +59,7 @@ public class Reception implements Runnable {
 			    int time = Integer.parseInt(fishTime);
 			    Fish newFish = new Fish(fishName, fishNewPosX, fishNewPosY, fishWidth, fishHeight, time);
 			    fishes.add(newFish);
-			    System.out.println("Poissonn ajoute : " + fishes.toString());
+			    //System.out.println("Poissonn ajoute : " + fishes.toString());
 			}
 		    }
 		}

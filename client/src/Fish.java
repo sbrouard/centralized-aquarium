@@ -18,8 +18,8 @@ public class Fish extends JPanel{
    
     private float time; // time to go to pos (toGo_x, toGo_y)
     
-    private int width;
-    private int height;
+    private int p_width;
+    private int p_height;
     
     private String name;
     private Image image;
@@ -38,14 +38,14 @@ public class Fish extends JPanel{
 	this.from_x = pos_x;
 	this.from_y = pos_y;
 	this.time = time;
-	this.width = width;
-	this.height = height;
+	this.p_width = width;
+	this.p_height = height;
 	this.nbTimesUpdated = 0;
 	
 	String[] type = name.split("_");
 	setImage(type[0]);
 		
-	this.setBounds(this.pos_x, this.pos_y, this.width, this.height);
+	this.setBounds(this.pos_x, this.pos_y, this.p_width, this.p_height);
 	this.setOpaque(false);
 
     }
@@ -53,7 +53,7 @@ public class Fish extends JPanel{
     private void setImage(String type){
 	try{
 	    if("magicarpe".equals(type)){
-		this.image = ImageIO.read(new File("fishes/magicarpe.png"));	    
+		this.image = ImageIO.read(new File("fishes/magicarpe.png"));
 	    }
 	} catch (IOException e){
 	    System.err.println("Cannot read image " + type + ".png");
@@ -63,6 +63,8 @@ public class Fish extends JPanel{
     public void setScreenSize(Dimension dim){
 	this.screenSizeHeight = dim.getHeight();
 	this.screenSizeWidth = dim.getWidth();
+	this.p_width = (this.p_width*(int) this.screenSizeWidth)/100;
+	this.p_height = (this.p_height*(int) this.screenSizeHeight)/100;
     }
 
     public String getName(){
@@ -79,11 +81,11 @@ public class Fish extends JPanel{
     }
 
     public int getWidth(){
-	return width;
+	return p_width;
     }
 
     public int getHeight(){
-	return height;
+	return p_height;
     }
 
     public void setPosX(int newPosX){
@@ -160,15 +162,22 @@ public class Fish extends JPanel{
 
     @Override
     public void paintComponent(Graphics g) {
+
 	super.paintComponent(g);
-	this.setBounds((this.pos_x*(int) this.screenSizeWidth)/100, (this.pos_y*(int) this.screenSizeHeight)/100, 
-		       (this.width*(int) this.screenSizeWidth)/100, (this.height*(int) this.screenSizeHeight)/100);
-	g.drawImage(image, 0, 0, (this.width*(int) this.screenSizeWidth)/100, (this.height*(int) this.screenSizeHeight)/100, this);
+	
+	int p_x = (this.pos_x*(int) this.screenSizeWidth)/100;
+	int p_y = (this.pos_y*(int) this.screenSizeHeight)/100;
+
+	//System.out.println(p_x + " " + p_y + " " + p_width + " " + p_height);
+
+	this.setBounds(p_x, p_y, this.p_width, this.p_height);
+	g.drawImage(image, 0, 0, this.p_width, this.p_height, this);
+	
     }
 
     @Override
     public String toString(){
-	return "nom: " + name + " pos: " + pos_x + ", " + pos_y + " taille: " + width + ", " + height;
+	return "nom: " + name + " pos: " + pos_x + ", " + pos_y + " taille: " + p_width + ", " + p_height;
     }
     
 }
