@@ -637,7 +637,7 @@ int delFish(struct client_data* client, int indice, struct server * s){
     
     if (name_length <= NAME_LENGTH)  { // Vérification que le nom du poisson rentre dans la chaine de caractères
       strncpy(f.name, &client->buffer[indice+1], name_length);
-      f.name[name_length] = '\0';e
+      f.name[name_length] = '\0';
       int exist = alreadyExistsFish(s,f.name);
       if (exist == -1){ // Cas poisson inexistant
 	send(client->socket, "NOK : Poisson inexistant\n", 25,0);
