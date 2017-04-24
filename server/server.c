@@ -673,14 +673,13 @@ int startFish(struct client_data* client, int indice, struct server * s){
       strncpy(f.name, &client->buffer[indice+1], name_length);
       f.name[name_length] = '\0';
       int exist = alreadyExistsFish(s,f.name);
-      printf("exist%s\n",f.name);
-      printf("exist%d\n",exist);
       if (exist == -1){ // Cas poisson inexistant
 	send(client->socket, "NOK : Poisson inexistant\n", 25,0);
 	return UNKNOWN_COMMAND;
       }
       else{
 	s->aqua.fishes[exist].isStarted = 1;
+	printf("%s started\n",f.name);
 
       }
     }
