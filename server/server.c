@@ -376,13 +376,7 @@ int getFishesContinously(struct client_data* client, int indice, struct server *
      send(client->socket,unknown, strlen(unknown),0);
    }
    else {
-     int t = s->conf.fish_update_interval;
-     while (1){
-       sleep(t);
-       sendFishesOfView(client,s);
-     }
-     
-
+     client->update_continuously = 1;
    }
 
 
