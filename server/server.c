@@ -198,6 +198,23 @@ int read_server(struct server *serv,fd_set *set)
 	return 0;
 }
 
+//Traduit une abscisse locale en % en abscisse globale  
+int trad_inv_coorx(struct aquarium *a,int view,int x){
+  int newx = x;
+
+  newx = (newx*a->views[view].size.width) + a->views[view].pos.x;  
+
+  return newx;
+ }
+
+//Traduit une ordonnee locale en % en ordonnee globale 
+int trad_inv_coory(struct aquarium *a,int view, int y){
+  int newy = y;
+
+  newy = (newy*a->views[view].size.height) + a->views[view].pos.y;  
+
+  return newy;
+ }
 
 
 
@@ -327,8 +344,6 @@ int sendFishesOfView(struct client_data* client, struct server* s){
       if (len > 0){
 	sprintf(msg, "list");
 	for (int i = 0; i < len; i++){
-	  printf("avant trad coorx : %d \n", s->aqua.fishes[tabfish[i]].pos.x);
-	  printf("avant trad coory : %d \n", s->aqua.fishes[tabfish[i]].pos.y);
 	  ajout += sprintf(msg+4+ajout, " [%s at %dx%d,%dx%d,%d]",
 		  s->aqua.fishes[tabfish[i]].name,
 		  trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.x),
@@ -498,7 +513,8 @@ i += 4;
 	pos = atoi(msg);
 	++nb;
 	if ( pos >= 0 && pos <= 100){
-	  f.pos.x = pos;
+	  f.pos.x = trad_inv_coorx(&s->aqua,client->id_view,pos); //We place the fish in the client view
+	  f.old_pos.x = f.pos.x;
 	  printf("posx %d\n", f.pos.x);
 	  j = 0;
 	  for (int c = 0; c < 3; ++c){
@@ -515,7 +531,8 @@ i += 4;
       else if (nb == 2 && client->buffer[i] == ',' && j != 0){
 	pos = atoi(msg);
 	if ( pos >= 0 && pos <= 100){
-	  f.pos.y = pos;
+	  f.pos.y = trad_inv_coory(&s->aqua,client->id_view,pos);
+	  f.old_pos.y = f.pos.y;
 	  printf("posy %d\n", f.pos.y);
       }
 
@@ -752,7 +769,9 @@ int moveFishes(struct server *s){
 
 int moveFish(struct fish *f, struct server *s){
   if (strcmp(f->mobility,"RandomWayPoint") == 0){
-    struct coord newpos = RandomWayPoint(s); 
+    struct coord newpos = RandomWayPoint(s);
+    f->old_pos.x = f->pos.x;
+    f->old_pos.y = f->pos.y;
     f->pos.x = newpos.x;
     f->pos.y = newpos.y;
    

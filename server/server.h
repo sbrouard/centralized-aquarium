@@ -54,6 +54,7 @@ struct fish{
   struct dimensions size;
   char mobility[NAME_LENGTH];
   struct coord pos;
+  struct coord old_pos;
   int isStarted;
 };
 
