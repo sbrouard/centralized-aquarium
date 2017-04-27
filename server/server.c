@@ -204,24 +204,24 @@ int read_server(struct server *serv,fd_set *set)
 //Traduit une abscisse globale en abscisse locale % 
 int trad_coorx(struct aquarium *a,int view,int x){
   int newx = x;
-  int i;
-  for (i = 0; i < view; ++i){
-    newx = newx - a->views[i].pos.x;
-  }
+  newx = newx - a->views[view].pos.x;
+   
 
   newx = (newx*100)/(a->views[view].size.width);
+   
   return newx;
  }
 
 //Traduit une ordonnee globale en ordonnee locale % 
 int trad_coory(struct aquarium *a,int view, int y){
   int newy = y;
-  int i;
-  for (i = 0; i < view; ++i){
-    newy = newy - a->views[i].pos.y;
-  }
+
+  newy = newy - a->views[view].pos.y;
+		    
+
 
   newy = (newy*100)/(a->views[view].size.height);
+		 
   return newy;
  }
 
@@ -327,6 +327,8 @@ int sendFishesOfView(struct client_data* client, struct server* s){
       if (len > 0){
 	sprintf(msg, "list");
 	for (int i = 0; i < len; i++){
+	  printf("avant trad coorx : %d \n", s->aqua.fishes[tabfish[i]].pos.x);
+	  printf("avant trad coory : %d \n", s->aqua.fishes[tabfish[i]].pos.y);
 	  ajout += sprintf(msg+4+ajout, " [%s at %dx%d,%dx%d,%d]",
 		  s->aqua.fishes[tabfish[i]].name,
 		  trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.x),
