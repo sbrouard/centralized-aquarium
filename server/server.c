@@ -321,12 +321,13 @@ int hello(struct client_data* client, int indice, struct server * s){
 //auxiliaire pour getFishes et getFishesContinously qui envoie la liste des poissons de la vue
 int sendFishesOfView(struct client_data* client, struct server* s){
   char msg[4096];
+  int ajout = 0;
   int * tabfish = malloc(sizeof(int));
   int len = findFishesOfView(&(s->aqua), client->id_view, tabfish);
       if (len > 0){
 	sprintf(msg, "list");
 	for (int i = 0; i < len; i++){
-	  sprintf(msg+4, " [%s at %dx%d,%dx%d,%d]",
+	  ajout += sprintf(msg+4+ajout, " [%s at %dx%d,%dx%d,%d]",
 		  s->aqua.fishes[tabfish[i]].name,
 		  trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.x),
 		  trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), 
