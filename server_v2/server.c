@@ -245,31 +245,6 @@ int trad_coory(struct aquarium *a,int view, int y){
 
 
 
-//verifie si un poisson est dans une vue
-int fishIsInView(struct fish* f, struct view* v){
-  if (f->pos.x >= v->pos.x && f->pos.x <= v->pos.x + v->size.width && f->pos.y >= v->pos.y && f->pos.y <= v->pos.y + v->size.height)
-    return 1;
-  else 
-    return 0;
-}
-
-
-//remplit par effet de bord un tableau avec les indices des poissons de la vue
-int findFishesOfView(struct aquarium* a, int view, int *tabfish ){
-  int len = 0;
-  int i;
-  for (i = 0; i < a->nb_fishes; ++i){
-    
-    if (fishIsInView(&a->fishes[i],&a->views[view])){
-      ++len;
-      tabfish = realloc(tabfish,len);
-      tabfish[len-1] = i;
-    }
-	 }
-  return len;
- 
-}
-
 
 
 //utilisee dans hello() pour factoriser l'affectation d'une vue a un client
@@ -288,6 +263,8 @@ int affect_available_view(struct server *s, struct client_data* client){
     return 1;
   }
 }
+
+
 
 int hello(struct client_data* client, int indice, struct server * s){
   if  (client->buffer[indice] == ' '){ // Cas "in as N<ID>"
@@ -335,6 +312,43 @@ int hello(struct client_data* client, int indice, struct server * s){
 }
 
 
+
+
+
+
+int findFishesOfView(struct aquarium* a, int view, int *tabfish)
+{
+  int len = 0;
+  int i;
+  for (i = 0; i < a->nb_fishes; ++i)
+    {
+      if (a->fishes[i].progress[view] != NOT_IN_VIEW)
+	{
+      if (a->fishes[i].progress[view] == ORIGIN)
+	{
+	  ++len;
+	  tabfish = realloc(tabfish,len);
+	  a->fishes[i].progress[view] = DEST;
+	  a->fishes[i].postosend[view] = a->fishes[i].origin[view];
+	  tabfish[len-1] = i;
+	  
+	}
+      else if (a->fishes[i].progress[view] == DEST)
+	{
+	  ++len;
+	  tabfish = realloc(tabfish,len);
+	  a->fishes[i].progress[view] = NOT_IN_VIEW;
+	  a->fishes[i].postosend[view] = a->fishes[i].dest[view];
+	  tabfish[len-1] = i;
+	}
+	}
+    }
+
+return len;
+ 
+}
+
+
 //auxiliaire pour getFishes et getFishesContinously qui envoie la liste des poissons de la vue
 int sendFishesOfView(struct client_data* client, struct server* s){
   char msg[4096];
@@ -347,8 +361,8 @@ int sendFishesOfView(struct client_data* client, struct server* s){
       {
       ajout += sprintf(msg+4+ajout, " [%s at %dx%d,%dx%d,%d]",
 		       s->aqua.fishes[tabfish[i]].name,
-		       trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.x),
-		       trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].pos.y), 
+		       trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].postosend[client->id_view].x),
+		       trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].postosend[client->id_view].y), 
 		       s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, DEFAULT_DURATION);
       }
     
@@ -363,7 +377,7 @@ int sendFishesOfView(struct client_data* client, struct server* s){
 
 
   free(tabfish);
-
+  
   return 0;
 }
 
@@ -746,7 +760,8 @@ int status(struct client_data* client, int indice, struct server* s){
 }
 
 
-struct coord RandomWayPoint(struct server *s){
+struct coord RandomWayPoint(struct server *s)
+{
   int x = rand() % (s->aqua.size.width);
   int y = rand() % (s->aqua.size.height);
   struct coord newpos;
@@ -756,10 +771,92 @@ struct coord RandomWayPoint(struct server *s){
   return newpos;
 }
 
-int moveFishes(struct server *s){
+//verifie si une coordonnee est dans une vue
+int coordIsInView(struct coord pos, struct view* v)
+{
+  if (pos.x >= v->pos.x && pos.x <= v->pos.x + v->size.width && pos.y >= v->pos.y && pos.y <= v->pos.y + v->size.height)
+    return 1;
+  else 
+    return 0;
+}
+
+
+int checkViews(struct coord pos, struct server *s, struct fish *f)
+{
+  for (int i = 0; i < s->aqua.nb_views; ++i)
+    {
+      if (f->originiscalculated[i] == NOT_CALCULATED)
+	{
+	  if (coordIsInView(pos,&(s->aqua.views[i])))
+	    {
+	  f->origin[i] = pos;
+	  f->originiscalculated[i] = CALCULATED;
+	  f->progress[i] = ORIGIN;
+	}
+	}
+	else
+	  {
+	  if (f->destiscalculated[i] == NOT_CALCULATED)
+	    {
+	  if (!coordIsInView(pos,&(s->aqua.views[i])))
+	    {
+	  f->dest[i] = pos;
+	  f->destiscalculated[i] = CALCULATED;  
+	}	
+	}
+	}
+	
+	}
+	  return 0;
+
+	}
+	
+	
+	
+	  
+int moveFishes(struct server *s)
+{
   for (int i = 0; i < s->aqua.nb_fishes; ++i){
     if (s->aqua.fishes[i].isStarted){
       moveFish(&s->aqua.fishes[i],s);
+
+      struct coord init = s->aqua.fishes[i].old_pos;
+      struct coord end = s->aqua.fishes[i].pos;
+      int count = -1;
+      while (init.x != end.x && init.y != end.y)
+	{
+	  ++count;
+	  if (count % 2 == 0)
+	    {
+	      if (init.x < end.x)
+		{
+	  checkViews(init,s,&(s->aqua.fishes[i]));
+	  ++init.x;
+		}
+	      else if (init.x > end.x)
+		{
+	  checkViews(init,s,&(s->aqua.fishes[i]));
+		  --init.x;
+		}
+	      
+	    }
+	  else
+	    {
+	      if (init.y < end.y)
+		{
+		  checkViews(init,s,&(s->aqua.fishes[i]));
+	  ++init.y;
+
+		}
+	      else if (init.y > end.y)
+		{
+	  		  checkViews(init,s,&(s->aqua.fishes[i]));
+		  --init.y;
+		}
+	    }
+	}
+
+ 
     }
 
   }
@@ -768,7 +865,8 @@ int moveFishes(struct server *s){
 }
 
 
-int moveFish(struct fish *f, struct server *s){
+int moveFish(struct fish *f, struct server *s)
+{
   if (strcmp(f->mobility,"RandomWayPoint") == 0){
     struct coord newpos = RandomWayPoint(s);
     f->old_pos.x = f->pos.x;
