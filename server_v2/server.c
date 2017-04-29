@@ -26,8 +26,8 @@ int i;
     getFishes(client,i,s);
   }
 
-  else if (strncmp(client->buffer,"getFishesContinously",i) == 0){
-    getFishesContinously(client,i,s);
+  else if (strncmp(client->buffer,"getFishesContinuously",i) == 0){
+    getFishesContinuously(client,i,s);
   }
 
   else  if (strncmp(client->buffer,"log",i) == 0){
@@ -319,37 +319,36 @@ int hello(struct client_data* client, int indice, struct server * s){
 int findFishesOfView(struct aquarium* a, int view, int *tabfish)
 {
   int len = 0;
-  int i;
-  for (i = 0; i < a->nb_fishes; ++i)
+  for (int i = 0; i < a->nb_fishes; ++i)
     {
       if (a->fishes[i].progress[view] != NOT_IN_VIEW)
 	{
-      if (a->fishes[i].progress[view] == ORIGIN)
-	{
-	  ++len;
-	  tabfish = realloc(tabfish,len);
-	  a->fishes[i].progress[view] = DEST;
-	  a->fishes[i].postosend[view] = a->fishes[i].origin[view];
-	  tabfish[len-1] = i;
-	  
-	}
-      else if (a->fishes[i].progress[view] == DEST)
-	{
-	  ++len;
-	  tabfish = realloc(tabfish,len);
-	  a->fishes[i].progress[view] = NOT_IN_VIEW;
-	  a->fishes[i].postosend[view] = a->fishes[i].dest[view];
-	  tabfish[len-1] = i;
-	}
+	  if (a->fishes[i].progress[view] == ORIGIN)
+	    {
+	      ++len;
+	      tabfish = realloc(tabfish,len);
+	      a->fishes[i].progress[view] = DEST;
+	      a->fishes[i].postosend[view] = a->fishes[i].origin[view];
+	      tabfish[len-1] = i;
+	      
+	    }
+	  else if (a->fishes[i].progress[view] == DEST)
+	    {
+	      ++len;
+	      tabfish = realloc(tabfish,len);
+	      a->fishes[i].progress[view] = NOT_IN_VIEW;
+	      a->fishes[i].postosend[view] = a->fishes[i].dest[view];
+	      tabfish[len-1] = i;
+	    }
 	}
     }
 
-return len;
+  return len;
  
 }
 
 
-//auxiliaire pour getFishes et getFishesContinously qui envoie la liste des poissons de la vue
+//auxiliaire pour getFishes et getFishesContinuously qui envoie la liste des poissons de la vue
 int sendFishesOfView(struct client_data* client, struct server* s){
   char msg[4096];
   int ajout = 0;
@@ -359,16 +358,16 @@ int sendFishesOfView(struct client_data* client, struct server* s){
     sprintf(msg, "list");
     for (int i = 0; i < len; i++)
       {
-      ajout += sprintf(msg+4+ajout, " [%s at %dx%d,%dx%d,%d]",
-		       s->aqua.fishes[tabfish[i]].name,
-		       trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].postosend[client->id_view].x),
-		       trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].postosend[client->id_view].y), 
-		       s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, DEFAULT_DURATION);
+	ajout += sprintf(msg+4+ajout, " [%s at %dx%d,%dx%d,%d]",
+			 s->aqua.fishes[tabfish[i]].name,
+			 trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].postosend[client->id_view].x),
+			 trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].postosend[client->id_view].y), 
+			 s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, DEFAULT_DURATION);
       }
     
     strcat(msg, "\n");
     send(client->socket, msg, strlen(msg),0);
-	
+    
 	
   }
   else{
@@ -403,7 +402,7 @@ return 0;
 }
 
 
-int getFishesContinously(struct client_data* client, int indice, struct server * s){
+int getFishesContinuously(struct client_data* client, int indice, struct server * s){
    if (client->buffer[indice] != '\n'){
      char * unknown = "NOK : commande introuvable\n";
      send(client->socket,unknown, strlen(unknown),0);
@@ -640,7 +639,12 @@ i += 4;
     strcpy(f.mobility, mobility);
     printf("mobi %s\n", f.mobility);
     f.isStarted = 0;
- 
+
+    
+    memset(f.progress, NOT_IN_VIEW, MAX_VIEWS);
+    memset(f.originiscalculated, NOT_CALCULATED, MAX_VIEWS);
+    memset(f.destiscalculated, NOT_CALCULATED, MAX_VIEWS);
+    
     s->aqua.fishes[s->aqua.nb_fishes] = f;
     ++s->aqua.nb_fishes;
    
@@ -726,12 +730,13 @@ int startFish(struct client_data* client, int indice, struct server * s){
   return 0;
 }
 
-
+/* A CHANGER */ 
 //envoie l'etat de la connexion (les poissons de la vue) avec le serveur au client
 int status(struct client_data* client, int indice, struct server* s){
-  if (client->buffer[indice] != '\n'){
+  /*  if (client->buffer[indice] != '\n'){*/
     char * unknown = "NOK : commande introuvable\n";
     send(client->socket,unknown, strlen(unknown),0);
+    /*
   }
 
   else {
@@ -755,7 +760,7 @@ int status(struct client_data* client, int indice, struct server* s){
 	
     free(tabfish);
 }
-
+    */
   return 0;
 }
 
@@ -790,6 +795,7 @@ int checkViews(struct coord pos, struct server *s, struct fish *f)
 	  if (coordIsInView(pos,&(s->aqua.views[i])))
 	    {
 	  f->origin[i] = pos;
+	  printf("origin %d %d\n",pos.x,pos.y);
 	  f->originiscalculated[i] = CALCULATED;
 	  f->progress[i] = ORIGIN;
 	}
@@ -801,6 +807,7 @@ int checkViews(struct coord pos, struct server *s, struct fish *f)
 	  if (!coordIsInView(pos,&(s->aqua.views[i])))
 	    {
 	  f->dest[i] = pos;
+	  printf("dest %d %d\n", pos.x,pos.y);
 	  f->destiscalculated[i] = CALCULATED;  
 	}	
 	}
@@ -819,9 +826,25 @@ int moveFishes(struct server *s)
   for (int i = 0; i < s->aqua.nb_fishes; ++i){
     if (s->aqua.fishes[i].isStarted){
       moveFish(&s->aqua.fishes[i],s);
+      
+
+      memset(s->aqua.fishes[i].originiscalculated, NOT_CALCULATED, MAX_VIEWS);
+      memset(s->aqua.fishes[i].destiscalculated, NOT_CALCULATED, MAX_VIEWS);
 
       struct coord init = s->aqua.fishes[i].old_pos;
       struct coord end = s->aqua.fishes[i].pos;
+
+      for (int v = 0; v < s->aqua.nb_views; ++v)
+	{
+	  if (coordIsInView(end,&(s->aqua.views[v])))
+	    {
+	  s->aqua.fishes[i].destiscalculated[v] = CALCULATED;
+	  s->aqua.fishes[i].dest[v] = end;
+	  printf("dest %d %d\n", end.x,end.y);
+	}
+
+	}
+      
       int count = -1;
       while (init.x != end.x && init.y != end.y)
 	{

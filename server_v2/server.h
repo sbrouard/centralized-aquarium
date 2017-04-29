@@ -27,9 +27,9 @@
 #define MAX_FISHES 1024
 #define NAME_LENGTH 256
 
-#define DEFAULT_DURATION 5
+#define DEFAULT_DURATION 3
 
-#define INTERVAL_UPDATE_FISHES 3
+#define INTERVAL_UPDATE_FISHES 6
 
 
 #define CALCULATED 1
@@ -112,7 +112,7 @@ int init_server(struct server *);
 int parse(struct client_data*, struct server*);
 int hello(struct client_data*, int indice, struct server*);
 int getFishes(struct client_data*, int indice, struct server *);
-int getFishesContinously(struct client_data*, int indice, struct server *);
+int getFishesContinuously(struct client_data*, int indice, struct server *);
 int log_out(struct client_data*, int indice, struct server *);
 int ping(struct client_data*, int indice);
 int status(struct client_data*, int indice, struct server *);
