@@ -202,7 +202,7 @@ int read_server(struct server *serv,fd_set *set)
 int trad_inv_coorx(struct aquarium *a,int view,int x){
   int newx = x;
 
-  newx = (newx*a->views[view].size.width) + a->views[view].pos.x;  
+  newx = (newx*a->views[view].size.width)/100 + a->views[view].pos.x;  
 
   return newx;
  }
@@ -211,7 +211,7 @@ int trad_inv_coorx(struct aquarium *a,int view,int x){
 int trad_inv_coory(struct aquarium *a,int view, int y){
   int newy = y;
 
-  newy = (newy*a->views[view].size.height) + a->views[view].pos.y;  
+  newy = (newy*a->views[view].size.height)/100 + a->views[view].pos.y;  
 
   return newy;
  }
