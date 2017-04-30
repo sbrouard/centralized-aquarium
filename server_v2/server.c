@@ -795,28 +795,28 @@ int checkViews(struct coord pos, struct server *s, struct fish *f)
 	  if (coordIsInView(pos,&(s->aqua.views[i])))
 	    {
 	  f->origin[i] = pos;
-	  printf("origin %d %d\n",pos.x,pos.y);
+	  printf("origin vue %d : %d %d\n",i,pos.x,pos.y);
 	  f->originiscalculated[i] = CALCULATED;
 	  f->progress[i] = ORIGIN;
+	    }
 	}
-	}
-	else
-	  {
+      else
+	{
 	  if (f->destiscalculated[i] == NOT_CALCULATED)
 	    {
-	  if (!coordIsInView(pos,&(s->aqua.views[i])))
-	    {
-	  f->dest[i] = pos;
-	  printf("dest %d %d\n", pos.x,pos.y);
-	  f->destiscalculated[i] = CALCULATED;  
-	}	
-	}
+	      if (!coordIsInView(pos,&(s->aqua.views[i])))
+		{
+		  f->dest[i] = pos;
+		  printf("dest vue %d : %d %d\n", i, pos.x,pos.y);
+		  f->destiscalculated[i] = CALCULATED;  
+		}	
+	    }
 	}
 	
-	}
-	  return 0;
+    }
+  return 0;
 
-	}
+}
 	
 	
 	
@@ -838,28 +838,45 @@ int moveFishes(struct server *s)
 	{
 	  if (coordIsInView(end,&(s->aqua.views[v])))
 	    {
-	  s->aqua.fishes[i].destiscalculated[v] = CALCULATED;
-	  s->aqua.fishes[i].dest[v] = end;
-	  printf("dest %d %d\n", end.x,end.y);
-	}
+	      s->aqua.fishes[i].destiscalculated[v] = CALCULATED;
+	      s->aqua.fishes[i].dest[v] = end;
+	      printf("dest vue %d : %d %d\n",v, end.x,end.y);
+	      if (coordIsInView(init,&(s->aqua.views[v])))
+		{
+		  s->aqua.fishes[i].originiscalculated[v] = CALCULATED;
+		  s->aqua.fishes[i].origin[v] = init;
+		  printf("origin vue %d : %d %d\n",v, init.x,init.y);
+		  s->aqua.fishes[i].progress[v] = DEST;
+		}
+	    }
+	  else if (coordIsInView(init,&(s->aqua.views[v])))
+		{
+		  s->aqua.fishes[i].originiscalculated[v] = CALCULATED;
+		  s->aqua.fishes[i].origin[v] = init;
+		  printf("origin vue %d : %d %d\n",v, init.x,init.y);
+		  s->aqua.fishes[i].progress[v] = DEST;
+		}
 
 	}
       
       int count = -1;
-      while (init.x != end.x && init.y != end.y)
+      int distance = 0;
+      while (init.x != end.x || init.y != end.y)
 	{
 	  ++count;
 	  if (count % 2 == 0)
 	    {
 	      if (init.x < end.x)
 		{
-	  checkViews(init,s,&(s->aqua.fishes[i]));
-	  ++init.x;
+		  checkViews(init,s,&(s->aqua.fishes[i]));
+		  ++init.x;
+		  ++distance;
 		}
 	      else if (init.x > end.x)
 		{
-	  checkViews(init,s,&(s->aqua.fishes[i]));
+		  checkViews(init,s,&(s->aqua.fishes[i]));
 		  --init.x;
+		  ++distance;
 		}
 	      
 	    }
@@ -868,17 +885,18 @@ int moveFishes(struct server *s)
 	      if (init.y < end.y)
 		{
 		  checkViews(init,s,&(s->aqua.fishes[i]));
-	  ++init.y;
-
+		  ++init.y;
+		  ++distance;
 		}
 	      else if (init.y > end.y)
 		{
-	  		  checkViews(init,s,&(s->aqua.fishes[i]));
+		  checkViews(init,s,&(s->aqua.fishes[i]));
 		  --init.y;
+		  ++distance;
 		}
 	    }
 	}
-
+      printf("distance : %d\n",distance);
  
     }
 
