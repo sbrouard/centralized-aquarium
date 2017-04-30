@@ -794,10 +794,10 @@ int checkViews(struct coord pos, struct server *s, struct fish *f)
 	{
 	  if (coordIsInView(pos,&(s->aqua.views[i])))
 	    {
-	  f->origin[i] = pos;
-	  printf("origin vue %d : %d %d\n",i,pos.x,pos.y);
-	  f->originiscalculated[i] = CALCULATED;
-	  f->progress[i] = ORIGIN;
+	      f->origin[i] = pos;
+	      printf("origin vue %d : %d %d\n",i,pos.x,pos.y);
+	      f->originiscalculated[i] = CALCULATED;
+	      f->progress[i] = ORIGIN;
 	    }
 	}
       else
