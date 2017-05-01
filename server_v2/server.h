@@ -33,7 +33,7 @@
 
 
 #define CALCULATED 1
-#define NOT_CALCULATED -1
+#define NOT_CALCULATED 0
 
 #define ORIGIN 0
 #define DEST 1

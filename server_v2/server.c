@@ -641,9 +641,9 @@ i += 4;
     f.isStarted = 0;
 
     
-    memset(f.progress, NOT_IN_VIEW, MAX_VIEWS);
-    memset(f.originiscalculated, NOT_CALCULATED, MAX_VIEWS);
-    memset(f.destiscalculated, NOT_CALCULATED, MAX_VIEWS);
+    memset(f.progress, NOT_IN_VIEW, MAX_VIEWS*sizeof(int));
+    memset(f.originiscalculated, NOT_CALCULATED, MAX_VIEWS*sizeof(int));
+    memset(f.destiscalculated, NOT_CALCULATED, MAX_VIEWS*sizeof(int));
     
     s->aqua.fishes[s->aqua.nb_fishes] = f;
     ++s->aqua.nb_fishes;
@@ -790,6 +790,7 @@ int checkViews(struct coord pos, struct server *s, struct fish *f)
 {
   for (int i = 0; i < s->aqua.nb_views; ++i)
     {
+      //     printf("or %d de %d\n",f->originiscalculated[2],f->destiscalculated[2]);
       if (f->originiscalculated[i] == NOT_CALCULATED)
 	{
 	  if (coordIsInView(pos,&(s->aqua.views[i])))
@@ -828,8 +829,8 @@ int moveFishes(struct server *s)
       moveFish(&s->aqua.fishes[i],s);
       
 
-      memset(s->aqua.fishes[i].originiscalculated, NOT_CALCULATED, MAX_VIEWS);
-      memset(s->aqua.fishes[i].destiscalculated, NOT_CALCULATED, MAX_VIEWS);
+      memset(s->aqua.fishes[i].originiscalculated, NOT_CALCULATED, MAX_VIEWS*sizeof(int));
+      memset(s->aqua.fishes[i].destiscalculated, NOT_CALCULATED, MAX_VIEWS*sizeof(int));
 
       struct coord init = s->aqua.fishes[i].old_pos;
       struct coord end = s->aqua.fishes[i].pos;
@@ -858,6 +859,7 @@ int moveFishes(struct server *s)
 		}
 
 	}
+
       
       int count = -1;
       int distance = 0;
