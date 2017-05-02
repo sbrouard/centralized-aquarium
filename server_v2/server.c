@@ -315,6 +315,12 @@ int hello(struct client_data* client, int indice, struct server * s){
 
 
 
+int fishIsInView(struct fish* f, struct view* v){
+  if (f->pos.x >= v->pos.x && f->pos.x <= v->pos.x + v->size.width && f->pos.y >= v->pos.y && f->pos.y <= v->pos.y + v->size.height)
+    return 1;
+  else 
+    return 0;
+}
 
 int findFishesOfView(struct aquarium* a, int view, int *tabfish)
 {
@@ -329,16 +335,27 @@ int findFishesOfView(struct aquarium* a, int view, int *tabfish)
 	      tabfish = realloc(tabfish,len);
 	      a->fishes[i].progress[view] = DEST;
 	      a->fishes[i].postosend[view] = a->fishes[i].origin[view];
-	      tabfish[len-1] = i;
-	      
+	      tabfish[len-1] = i; 
 	    }
 	  else if (a->fishes[i].progress[view] == DEST)
 	    {
 	      ++len;
 	      tabfish = realloc(tabfish,len);
-	      a->fishes[i].progress[view] = NOT_IN_VIEW;
+	      if (fishIsInView(&(a->fishes[i]), &(a->views[view])))
+		  a->fishes[i].progress[view] = NOT_MOVING;
+	      else a->fishes[i].progress[view] = NOT_IN_VIEW;
+	       
 	      a->fishes[i].postosend[view] = a->fishes[i].dest[view];
 	      tabfish[len-1] = i;
+	    }
+	  else if (a->fishes[i].progress[view] == NOT_MOVING)
+	    {
+	      ++len;
+	      tabfish = realloc(tabfish,len);
+	      a->fishes[i].progress[view] = NOT_MOVING;
+	      a->fishes[i].postosend[view] = a->fishes[i].dest[view];
+	      tabfish[len-1] = i;
+
 	    }
 	}
     }
