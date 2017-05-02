@@ -91,6 +91,7 @@ struct server{
 int fd_to_read(struct server *,fd_set *,struct timeval *timeout);
 int read_server(struct server *,fd_set *);
 int init_server(struct server *);
+int remove_client(struct client_data* client, struct server *s);
 
 int parse(struct client_data*, struct server*);
 int hello(struct client_data*, int indice, struct server*);

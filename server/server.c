@@ -2,12 +2,14 @@
 
 #define TEST {printf("test\n");fflush(0);}
 
-int init_client(struct client_data *c, int sock)
+int init_client(struct client_data *c, int sock, struct server *s)
 {
   c->socket = sock;
   c->id_view = -1;//PAS ENCORE PRIS EN COMPTE
   c->buffer_size = 0;
   c->update_continuously = 0;
+  c->last_activity.tv_sec = s->conf.display_timeout_value;
+  c->last_activity.tv_usec = 0;
 }
 
 
@@ -60,6 +62,7 @@ int remove_client(struct client_data* client, struct server *s)
 {
 	int i;
 
+	shutdown(client->socket,SHUT_WR|SHUT_RD);
 	close(client->socket);
 
 	for(i=0;i<s->nb_client;i++)
@@ -86,6 +89,8 @@ int remove_client(struct client_data* client, struct server *s)
 int read_client(struct client_data* client, struct server *s){
 	int res;
 
+	client->last_activity.tv_sec = s->conf.display_timeout_value;
+	client->last_activity.tv_usec = 0;
 	res = recv(client->socket,&client->buffer[client->buffer_size],1,MSG_DONTWAIT);
 
 
@@ -165,6 +170,18 @@ int fd_to_read(struct server *serv,fd_set *set,struct timeval *timeout)
 
 			}
 		}
+		if(serv->client_list[i].last_activity.tv_sec < timeout->tv_sec)
+		{
+			timeout->tv_sec = serv->client_list[i].last_activity.tv_sec;
+			timeout->tv_usec = serv->client_list[i].last_activity.tv_usec;
+		}else if(serv->client_list[i].last_activity.tv_sec == timeout->tv_sec)
+		{
+			if(timeout->tv_usec > serv->client_list[i].last_activity.tv_usec)
+			{
+				timeout->tv_usec = serv->client_list[i].last_activity.tv_usec;
+			}
+
+		}
 	}
 
 	return nfds + 1;
@@ -183,7 +200,7 @@ int read_server(struct server *serv,fd_set *set)
 		{
 			serv->client_list = malloc(sizeof(struct client_data)*serv->conf.max_client);
 		}
-		init_client(&serv->client_list[serv->nb_client],accept(serv->socket,(struct sockaddr*)&client_in,&size));
+		init_client(&serv->client_list[serv->nb_client],accept(serv->socket,(struct sockaddr*)&client_in,&size),serv);
 		serv->nb_client++;
 	}
 
