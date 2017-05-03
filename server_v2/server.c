@@ -747,21 +747,35 @@ int startFish(struct client_data* client, int indice, struct server * s){
   return 0;
 }
 
-/* A CHANGER */ 
+//remplit par effet de bord un tableau avec les indices des poissons de la vue (pour la commande status)
+int getFishesInView(struct aquarium* a, int view, int *tabfish ){
+  int len = 0;
+  int i;
+  for (i = 0; i < a->nb_fishes; ++i){
+    
+    if (fishIsInView(&a->fishes[i],&a->views[view])){
+      ++len;
+      tabfish = realloc(tabfish,len);
+      tabfish[len-1] = i;
+    }
+	 }
+  return len;
+ 
+}
+
 //envoie l'etat de la connexion (les poissons de la vue) avec le serveur au client
 int status(struct client_data* client, int indice, struct server* s){
-  /*  if (client->buffer[indice] != '\n'){*/
+  if (client->buffer[indice] != '\n'){
     char * unknown = "NOK : commande introuvable\n";
     send(client->socket,unknown, strlen(unknown),0);
-    /*
   }
-
+  
   else {
     char msg1[256];
     char msg2[256];
     int i;
     int * tabfish = malloc(sizeof(int));
-    int len = findFishesOfView(&(s->aqua), client->id_view, tabfish);
+    int len = getFishesInView(&(s->aqua), client->id_view, tabfish);
     sprintf(msg1, "OK : Connecte au controleur, %d poisson(s) trouve(s)\n", len);
     send(client->socket,msg1, strlen(msg1),0);
     for (i = 0 ; i < len; ++i){
@@ -777,7 +791,7 @@ int status(struct client_data* client, int indice, struct server* s){
 	
     free(tabfish);
 }
-    */
+    
   return 0;
 }
 
