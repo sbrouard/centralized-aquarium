@@ -178,14 +178,16 @@ public class Fish extends JPanel{
     @Override
     public void paintComponent(Graphics g) {
 
-	fishLock.lock();
-	super.paintComponent(g);
-
-	//System.out.println(p_x + " " + p_y + " " + p_width + " " + p_height);
-
-	this.setBounds(this.pos_x, this.pos_y, this.p_width, this.p_height);
-	g.drawImage(image, 0, 0, this.p_width, this.p_height, this);
-	fishLock.unlock();
+	if(this.pos_x < this.screenSizeWidth && this.pos_x > (0 - this.p_width) && this.pos_y > (0 - this.screenSizeHeight) && this.pos_y < this.screenSizeHeight){
+	    fishLock.lock();
+	    super.paintComponent(g);
+	    
+	    //System.out.println(p_x + " " + p_y + " " + p_width + " " + p_height);
+	    
+	    this.setBounds(this.pos_x, this.pos_y, this.p_width, this.p_height);
+	    g.drawImage(image, 0, 0, this.p_width, this.p_height, this);
+	    fishLock.unlock();
+	}
     }
 
     @Override
