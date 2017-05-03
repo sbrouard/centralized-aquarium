@@ -104,6 +104,35 @@ int main(int argc, char **argv)
 					}
 				}
 			}
+			if(term.serv.client_list[i].last_activity.tv_sec < sec)
+			{
+				printf("client disconnected\n");
+				remove_client(&term.serv.client_list[i],&term.serv);
+				term.serv.client_list[i].last_activity.tv_sec = term.serv.conf.fish_update_interval;
+				term.serv.client_list[i].last_activity.tv_usec = 0;
+			}else
+			{
+				term.serv.client_list[i].last_activity.tv_sec -= sec;
+				if(term.serv.client_list[i].last_activity.tv_usec <= usec)
+				{
+					if(term.serv.client_list[i].last_activity.tv_sec == 0)
+					{
+						printf("client disconnected\n");
+						remove_client(&term.serv.client_list[i],&term.serv);
+						term.serv.client_list[i].last_activity.tv_sec = term.serv.conf.fish_update_interval;
+						term.serv.client_list[i].last_activity.tv_usec = 0;
+					}else
+					{
+						term.serv.client_list[i].last_activity.tv_sec--;
+						//99999 pour éviter que tv_sec = 1000000
+						term.serv.client_list[i].last_activity.tv_usec = 999999 + term.serv.client_list[i].last_activity.tv_usec - usec;
+					}
+
+				}else
+				{
+					term.serv.client_list[i].last_activity.tv_usec -= usec;
+				}
+			}
 		}
 
 		read_server(&term.serv,&read_fds);

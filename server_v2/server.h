@@ -37,7 +37,8 @@
 
 #define ORIGIN 0
 #define DEST 1
-#define NOT_IN_VIEW 2
+#define NOT_MOVING 2
+#define NOT_IN_VIEW 3
 
 struct coord{
   int x;
