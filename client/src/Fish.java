@@ -4,6 +4,7 @@ import java.awt.event.*;
 import javax.imageio.*;
 import java.io.*;
 import java.lang.Math;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Fish extends JPanel{
 
@@ -29,14 +30,16 @@ public class Fish extends JPanel{
     private double screenSizeHeight;
     private double screenSizeWidth;
 
+    private ReentrantLock fishLock = new ReentrantLock();
+
     public Fish(String name, int pos_x, int pos_y, int width, int height, float time){
 	this.name = name;
 	this.pos_x = pos_x;
 	this.pos_y = pos_y;
-	this.toGo_x = pos_x;
-	this.toGo_y = pos_y;
-	this.from_x = pos_x;
-	this.from_y = pos_y;
+	this.toGo_x = this.pos_x;
+	this.toGo_y = this.pos_y;
+	this.from_x = this.pos_x;
+	this.from_y = this.pos_y;
 	this.time = time;
 	this.p_width = width;
 	this.p_height = height;
@@ -52,7 +55,9 @@ public class Fish extends JPanel{
     
     private void setImage(String type){
 	try{
-	    if("magicarpe".equals(type)){
+	    if("leviator".equals(type)){
+		this.image = ImageIO.read(new File("fishes/leviator.png"));
+	    } else {
 		this.image = ImageIO.read(new File("fishes/magicarpe.png"));
 	    }
 	} catch (IOException e){
@@ -65,6 +70,12 @@ public class Fish extends JPanel{
 	this.screenSizeWidth = dim.getWidth();
 	this.p_width = (this.p_width*(int) this.screenSizeWidth)/100;
 	this.p_height = (this.p_height*(int) this.screenSizeHeight)/100;
+	this.pos_x = (this.pos_x*(int) this.screenSizeWidth)/100;
+	this.pos_y = (this.pos_y*(int) this.screenSizeHeight)/100;
+	this.toGo_x = (this.toGo_x*(int) this.screenSizeWidth)/100;
+	this.toGo_y = (this.toGo_y*(int) this.screenSizeHeight)/100;
+	this.from_x = (this.from_x*(int) this.screenSizeWidth)/100;
+	this.from_y = (this.from_y*(int) this.screenSizeHeight)/100;
     }
 
     public String getName(){
@@ -145,34 +156,36 @@ public class Fish extends JPanel{
     }
 
     public void move(){
+	fishLock.lock();
 	this.moveStraight();
+	fishLock.unlock();
     }
 
     
     public void updateFish(Fish newFish){
+	fishLock.lock();
 	if(this.toGo_x != newFish.getToGoX() || this.toGo_y != newFish.getToGoY()){
 	    this.time = newFish.getTime();
-	    this.toGo_x = newFish.getToGoX();
-	    this.toGo_y = newFish.getToGoY();
+	    this.toGo_x = (newFish.getToGoX()*(int) this.screenSizeWidth)/100;
+	    this.toGo_y = (newFish.getToGoY()*(int) this.screenSizeHeight)/100;
 	    this.nbTimesUpdated = 0;
 	    this.from_x = this.pos_x;
 	    this.from_y = this.pos_y;
 	}
+	fishLock.unlock();
     }
 
     @Override
     public void paintComponent(Graphics g) {
 
+	fishLock.lock();
 	super.paintComponent(g);
-	
-	int p_x = (this.pos_x*(int) this.screenSizeWidth)/100;
-	int p_y = (this.pos_y*(int) this.screenSizeHeight)/100;
 
 	//System.out.println(p_x + " " + p_y + " " + p_width + " " + p_height);
 
-	this.setBounds(p_x, p_y, this.p_width, this.p_height);
+	this.setBounds(this.pos_x, this.pos_y, this.p_width, this.p_height);
 	g.drawImage(image, 0, 0, this.p_width, this.p_height, this);
-	
+	fishLock.unlock();
     }
 
     @Override

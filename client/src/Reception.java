@@ -33,6 +33,7 @@ public class Reception implements Runnable {
 	    case "list":
 		//int indexOf(String  str, int fromIndex)
 		//String substring(int d, int f)
+
 		int nextOpenBracket = -1;
 		int nextCloseBracket = -1;
 		ArrayList<Fish> fishes = new ArrayList<Fish>();
@@ -59,13 +60,16 @@ public class Reception implements Runnable {
 			    int time = Integer.parseInt(fishTime);
 			    Fish newFish = new Fish(fishName, fishNewPosX, fishNewPosY, fishWidth, fishHeight, time);
 			    fishes.add(newFish);
-			    //System.out.println("Poissonn ajoute : " + fishes.toString());
+			    //System.out.println("Poisson ajoute : " + fishes.toString());
 			}
 		    }
 		}
 	        aquarium.setFishes(fishes);
 		return true;
 
+	    case "No":
+		aquarium.setFishes(new ArrayList<Fish>());
+		return true;
 		// pong
 	    case "pong":
 		return true;
