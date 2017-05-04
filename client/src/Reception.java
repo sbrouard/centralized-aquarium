@@ -14,7 +14,7 @@ public class Reception implements Runnable {
 	socket = s;
 	aquarium = new Aquarium();
 	//Thread t4 = new Thread(new Display(aquarium, 40));
-	this.timeUpdate = 40;
+	this.timeUpdate = 50;
 	//t4.start();
     }
 

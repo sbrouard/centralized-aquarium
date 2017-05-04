@@ -26,6 +26,7 @@ public class Fish extends JPanel{
     private Image image;
     
     private int nbTimesUpdated;
+    private final int timeUpdate;
     
     private double screenSizeHeight;
     private double screenSizeWidth;
@@ -44,6 +45,7 @@ public class Fish extends JPanel{
 	this.p_width = width;
 	this.p_height = height;
 	this.nbTimesUpdated = 0;
+	this.timeUpdate = 50;
 	
 	String[] type = name.split("_");
 	setImage(type[0]);
@@ -123,20 +125,20 @@ public class Fish extends JPanel{
 
     public void moveStraight(){
 
-	if(this.pos_x != this.toGo_x && this.time != 0 && 40*nbTimesUpdated < 1000*this.time){
-	    this.pos_x = (int)(((float)(this.toGo_x - this.from_x) / (this.time*1000))*40*(nbTimesUpdated+1)) + this.from_x;
+	if(this.pos_x != this.toGo_x && this.time != 0 && this.timeUpdate*nbTimesUpdated < 1000*this.time){
+	    this.pos_x = (int)(((float)(this.toGo_x - this.from_x) / (this.time*1000))*this.timeUpdate*(nbTimesUpdated+1)) + this.from_x;
 	}
 
-	if(this.pos_y != this.toGo_y && this.time != 0 && 40*nbTimesUpdated < 1000*this.time){
-	    this.pos_y = (int)(((float)(this.toGo_y - this.from_y) / (this.time*1000))*40*(nbTimesUpdated+1)) + this.from_y;
+	if(this.pos_y != this.toGo_y && this.time != 0 && this.timeUpdate*nbTimesUpdated < 1000*this.time){
+	    this.pos_y = (int)(((float)(this.toGo_y - this.from_y) / (this.time*1000))*this.timeUpdate*(nbTimesUpdated+1)) + this.from_y;
 	}
 
-	if(this.pos_x == this.toGo_x || this.time == 0 || 40*nbTimesUpdated >= 1000*this.time){
+	if(this.pos_x == this.toGo_x || this.time == 0 || this.timeUpdate*nbTimesUpdated >= 1000*this.time){
 	    this.pos_x = toGo_x;
 	    this.from_x = this.pos_x;
 	}
 
-	if(this.pos_y == this.toGo_y || this.time == 0 || 40*nbTimesUpdated >= 1000*this.time){
+	if(this.pos_y == this.toGo_y || this.time == 0 || this.timeUpdate*nbTimesUpdated >= 1000*this.time){
 	    this.pos_y = toGo_y;
 	    this.from_y = this.pos_y;
 	}
