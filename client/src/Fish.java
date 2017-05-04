@@ -49,7 +49,8 @@ public class Fish extends JPanel{
 	
 	String[] type = name.split("_");
 	setImage(type[0]);
-		
+
+	this.setBounds(this.pos_x, this.pos_y, this.p_width, this.p_height);
 	this.setOpaque(false);
     }
     
