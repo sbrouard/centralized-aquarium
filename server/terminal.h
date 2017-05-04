@@ -73,5 +73,6 @@ void cmd_del_view(terminal *term);
 void cmd_launch(terminal *term);
 void cmd_kill(terminal *term);
 int init_terminal(terminal *term);
+void close_terminal(terminal *term);
 
 #endif

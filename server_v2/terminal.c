@@ -1,9 +1,10 @@
 #include "terminal.h"
 
 //ajouter des ' ' pour les commande pour remplire les MAX_SIZE_CMD caractéres
-#define NBR_CMD 7
+#define NBR_CMD 8
 command_function cmd_func[]={{"load  ",parse_load},
 				{"exit  ",parse_exit},
+				{"kill  ",parse_kill},
 				{"save  ",parse_save},
 				{"show  ",parse_show_aquarium},
 				{"add   ",parse_add_view},
@@ -12,11 +13,17 @@ command_function cmd_func[]={{"load  ",parse_load},
 
 int init_terminal(terminal *term)
 {
+	struct termios t;
+
 	term->command_length = 0;
 	term->state = 0;
 	term->is_next_get = 0;
 	term->caracter_count = 0;
 	term->is_killed = 0;
+
+	tcgetattr(0,&t);
+	t.c_lflag &= t.c_lflag^ISIG;
+	tcsetattr(0,TCSANOW,&t);
 
 	fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
 
@@ -30,6 +37,15 @@ int init_terminal(terminal *term)
 	parse_config_file(&term->serv.conf);
 
 	write(1,">",1);
+}
+
+void close_terminal(terminal *term)
+{
+	struct termios t;
+
+	tcgetattr(0,&t);
+	t.c_lflag |= ISIG;
+	tcsetattr(0,TCSANOW,&t);
 }
 
 void zero_str_arg(str_arg *str)
@@ -53,7 +69,13 @@ int next_char(terminal *term)
 		res = read(0,&term->next_c,1);
 		if(res == -1 || res == 0)
 		{
-			if(errno != EWOULDBLOCK && errno != EAGAIN)
+			if(errno == EINTR)
+			{
+				term->caracter_count = 0;
+				term->is_next_get = 0;
+
+				return next_char(term);
+			}if(errno != EWOULDBLOCK && errno != EAGAIN)
 			{
 				perror("read()");
 				exit(1);
@@ -128,8 +150,8 @@ void read_terminal(terminal *term)
 	}
 
 	while(next_char(term) != NO_MORE_READ)
-		{
-			if(next_char(term) == ' ' || next_char(term) == '\n')
+	{
+		if(next_char(term) == ' ' || next_char(term) == '\n')
 		{
 			if(term->command_length > 0)
 			{
@@ -139,7 +161,7 @@ void read_terminal(terminal *term)
 
 				if(i == NBR_CMD)
 				{
-					if(syntax_error("Unknow command",term))
+					if(syntax_error("Unknown command",term))
 					{
 						term->state = 0;
 						term->command_length = 0;
@@ -173,7 +195,7 @@ void read_terminal(terminal *term)
 		}
 		if(term->command_length > MAX_SIZE_CMD)
 		{
-			if(syntax_error("Unknow command",term))
+			if(syntax_error("Unknown command",term))
 			{
 				term->state = 0;
 				term->command_length = 0;
@@ -366,7 +388,7 @@ int parse_show_aquarium(terminal *term)
 			if(term->split_cmd.length != 8 || strncmp(term->split_cmd.str,"aquarium",8) != 0)
 			{
 				free_str_arg(&term->split_cmd);
-				return syntax_error("Unknow command",term);
+				return syntax_error("Unknown command",term);
 			}
 		case 3:
 			term->state = 3;
@@ -407,7 +429,7 @@ int parse_del_view(terminal *term)
 			if(term->split_cmd.length != 4 || strncmp(term->split_cmd.str,"view",4) != 0)
 			{
 				free_str_arg(&term->split_cmd);
-				return syntax_error("Unknow command",term);
+				return syntax_error("Unknown command",term);
 			}
 			free_str_arg(&term->split_cmd);
 		case 3:
@@ -469,7 +491,7 @@ int parse_add_view(terminal *term)
 			if(term->split_cmd.length != 4 || strncmp(term->split_cmd.str,"view",4) != 0)
 			{
 				free_str_arg(&term->split_cmd);
-				return syntax_error("Unknow command",term);
+				return syntax_error("Unknown command",term);
 			}
 			free_str_arg(&term->split_cmd);
 		case 3:
@@ -573,6 +595,30 @@ int parse_add_view(terminal *term)
 
 	free_str_arg(&term->cv.id);
 	
+	return 1;
+}
+
+int parse_kill(terminal *term)
+{
+	switch(term->state)
+	{
+		case 1:
+			term->state = 1;
+			if(!parse_blank(term))
+				return 0;
+		case 2:
+			term->state = 2;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != '\n')
+				return syntax_error("unexpected argument",term);
+			else
+				get_char(term);
+
+	}
+
+	cmd_kill(term);
+
 	return 1;
 }
 
@@ -798,4 +844,26 @@ void cmd_launch(terminal *term)
 		return;
 	}
 	printf("server launched\n");
+}
+
+void cmd_kill(terminal *term)
+{
+	int i;
+
+	if(term->serv.socket == -1)
+	{
+		printf("server not launched\n");
+		return;
+	}
+
+	printf("close listennig port...\n");
+	close(term->serv.socket);
+	term->serv.socket = -1;
+
+	printf("close clients connections...\n");
+
+	while(term->serv.nb_client>0)
+	{
+		remove_client(&term->serv.client_list[0],&term->serv);
+	}
 }
