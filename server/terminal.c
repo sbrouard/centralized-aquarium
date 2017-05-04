@@ -1,9 +1,10 @@
 #include "terminal.h"
 
 //ajouter des ' ' pour les commande pour remplire les MAX_SIZE_CMD caractéres
-#define NBR_CMD 7
+#define NBR_CMD 8
 command_function cmd_func[]={{"load  ",parse_load},
 				{"exit  ",parse_exit},
+				{"kill  ",parse_kill},
 				{"save  ",parse_save},
 				{"show  ",parse_show_aquarium},
 				{"add   ",parse_add_view},
@@ -53,7 +54,13 @@ int next_char(terminal *term)
 		res = read(0,&term->next_c,1);
 		if(res == -1 || res == 0)
 		{
-			if(errno != EWOULDBLOCK && errno != EAGAIN)
+			if(errno == EINTR)
+			{
+				term->caracter_count = 0;
+				term->is_next_get = 0;
+
+				return next_char(term);
+			}if(errno != EWOULDBLOCK && errno != EAGAIN)
 			{
 				perror("read()");
 				exit(1);
@@ -128,8 +135,8 @@ void read_terminal(terminal *term)
 	}
 
 	while(next_char(term) != NO_MORE_READ)
-		{
-			if(next_char(term) == ' ' || next_char(term) == '\n')
+	{
+		if(next_char(term) == ' ' || next_char(term) == '\n')
 		{
 			if(term->command_length > 0)
 			{
@@ -576,6 +583,30 @@ int parse_add_view(terminal *term)
 	return 1;
 }
 
+int parse_kill(terminal *term)
+{
+	switch(term->state)
+	{
+		case 1:
+			term->state = 1;
+			if(!parse_blank(term))
+				return 0;
+		case 2:
+			term->state = 2;
+			if(next_char(term) == NO_MORE_READ)
+				return 0;
+			if(next_char(term) != '\n')
+				return syntax_error("unexpected argument",term);
+			else
+				get_char(term);
+
+	}
+
+	cmd_kill(term);
+
+	return 1;
+}
+
 int parse_exit(terminal *term)
 {
 	switch(term->state)
@@ -798,4 +829,26 @@ void cmd_launch(terminal *term)
 		return;
 	}
 	printf("server launched\n");
+}
+
+void cmd_kill(terminal *term)
+{
+	int i;
+
+	if(term->serv.socket == -1)
+	{
+		printf("server not launched\n");
+		return;
+	}
+
+	printf("close listennig port...\n");
+	close(term->serv.socket);
+	term->serv.socket = -1;
+
+	printf("close clients connections...\n");
+
+	while(term->serv.nb_client>0)
+	{
+		remove_client(&term->serv.client_list[0],&term->serv);
+	}
 }
