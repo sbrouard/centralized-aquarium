@@ -48,9 +48,7 @@ public class Fish extends JPanel{
 	String[] type = name.split("_");
 	setImage(type[0]);
 		
-	this.setBounds(this.pos_x, this.pos_y, this.p_width, this.p_height);
 	this.setOpaque(false);
-
     }
     
     private void setImage(String type){
@@ -125,20 +123,20 @@ public class Fish extends JPanel{
 
     public void moveStraight(){
 
-	if(this.pos_x != this.toGo_x && this.time != 0 && 50*nbTimesUpdated < 1000*this.time){
-	    this.pos_x = (int)(((float)(this.toGo_x - this.from_x) / (this.time*1000))*50*(nbTimesUpdated+1)) + this.from_x;
+	if(this.pos_x != this.toGo_x && this.time != 0 && 40*nbTimesUpdated < 1000*this.time){
+	    this.pos_x = (int)(((float)(this.toGo_x - this.from_x) / (this.time*1000))*40*(nbTimesUpdated+1)) + this.from_x;
 	}
 
-	if(this.pos_y != this.toGo_y && this.time != 0 && 50*nbTimesUpdated < 1000*this.time){
-	    this.pos_y = (int)(((float)(this.toGo_y - this.from_y) / (this.time*1000))*50*(nbTimesUpdated+1)) + this.from_y;
+	if(this.pos_y != this.toGo_y && this.time != 0 && 40*nbTimesUpdated < 1000*this.time){
+	    this.pos_y = (int)(((float)(this.toGo_y - this.from_y) / (this.time*1000))*40*(nbTimesUpdated+1)) + this.from_y;
 	}
 
-	if(this.pos_x == this.toGo_x || this.time == 0 || 50*nbTimesUpdated >= 1000*this.time){
+	if(this.pos_x == this.toGo_x || this.time == 0 || 40*nbTimesUpdated >= 1000*this.time){
 	    this.pos_x = toGo_x;
 	    this.from_x = this.pos_x;
 	}
 
-	if(this.pos_y == this.toGo_y || this.time == 0 || 50*nbTimesUpdated >= 1000*this.time){
+	if(this.pos_y == this.toGo_y || this.time == 0 || 40*nbTimesUpdated >= 1000*this.time){
 	    this.pos_y = toGo_y;
 	    this.from_y = this.pos_y;
 	}
@@ -180,12 +178,11 @@ public class Fish extends JPanel{
 
 	if(this.pos_x < this.screenSizeWidth && this.pos_x > (0 - this.p_width) && this.pos_y > (0 - this.screenSizeHeight) && this.pos_y < this.screenSizeHeight){
 	    fishLock.lock();
-	    super.paintComponent(g);
+	    super.paintComponent(g);	  
 	    
-	    //System.out.println(p_x + " " + p_y + " " + p_width + " " + p_height);
 	    
 	    this.setBounds(this.pos_x, this.pos_y, this.p_width, this.p_height);
-	    g.drawImage(image, 0, 0, this.p_width, this.p_height, this);
+	    g.drawImage(image, 0, 0, this.p_width, this.p_height, this);	    
 	    fishLock.unlock();
 	}
     }

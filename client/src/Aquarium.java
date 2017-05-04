@@ -88,11 +88,10 @@ public class Aquarium extends JFrame{
 
 	for(Fish f : this.fishes){
 	    f.move();
-	    //System.out.println(f);
 	}
 
 	fishesLock.unlock();
-
+	
 	this.repaint();
 
 	/* TO DEBUG
