@@ -6,11 +6,18 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
+#include <signal.h>
+
+terminal term;
+
+void sigint_handler(int n)
+{
+	cmd_kill(&term);
+}
 
 int main(int argc, char **argv)
 {
 	int nfds,i;
-	terminal term;
 	fd_set read_fds;
 	struct timeval t1,t2,timeout;
 	long sec,usec;
@@ -18,6 +25,8 @@ int main(int argc, char **argv)
 	srand(time(NULL));
 	init_server(&term.serv);
 	init_terminal(&term);
+
+	signal(SIGINT, sigint_handler);
 
 	while(!term.is_killed)
 	{
