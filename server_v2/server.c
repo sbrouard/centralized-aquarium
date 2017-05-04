@@ -334,7 +334,21 @@ int findFishesOfView(struct aquarium* a, int view, int *tabfish)
 	      ++len;
 	      tabfish = realloc(tabfish,len);
 	      a->fishes[i].progress[view] = DEST;
-	      a->fishes[i].postosend[view] = a->fishes[i].origin[view];
+
+	      struct coord posorigin = a->fishes[i].origin[view];
+	      if (a->fishes[i].traverseorigin[view] == YES)
+		{
+		  if (posorigin.x == 0)
+		    {
+		      posorigin.x -= a->fishes[i].size.width;
+		    }
+		  if (posorigin.y == 0)
+		    {
+		         posorigin.y -= a->fishes[i].size.height;
+		    }
+		}
+
+	      a->fishes[i].postosend[view] = posorigin;
 	      tabfish[len-1] = i; 
 	    }
 	  else if (a->fishes[i].progress[view] == DEST)
@@ -345,7 +359,20 @@ int findFishesOfView(struct aquarium* a, int view, int *tabfish)
 		  a->fishes[i].progress[view] = NOT_MOVING;
 	      else a->fishes[i].progress[view] = NOT_IN_VIEW;
 	       
-	      a->fishes[i].postosend[view] = a->fishes[i].dest[view];
+	      struct coord posdest = a->fishes[i].dest[view];
+	      if (a->fishes[i].traversedest[view] == YES)
+		{
+		  if (posdest.x == 0)
+		    {
+		      posdest.x += a->fishes[i].size.width;
+		    }
+		  if (posdest.y == 0)
+		    {
+		         posdest.y += a->fishes[i].size.height;
+		    }
+		}
+
+	      a->fishes[i].postosend[view] = posdest;
 	      tabfish[len-1] = i;
 	    }
 	  else if (a->fishes[i].progress[view] == NOT_MOVING)
@@ -661,7 +688,9 @@ i += 4;
     memset(f.progress, NOT_IN_VIEW, MAX_VIEWS*sizeof(int));
     memset(f.originiscalculated, NOT_CALCULATED, MAX_VIEWS*sizeof(int));
     memset(f.destiscalculated, NOT_CALCULATED, MAX_VIEWS*sizeof(int));
-    
+    memset(f.traverseorigin, NO, MAX_VIEWS*sizeof(int));
+    memset(f.traversedest, NO, MAX_VIEWS*sizeof(int));
+
     s->aqua.fishes[s->aqua.nb_fishes] = f;
     ++s->aqua.nb_fishes;
    
@@ -830,6 +859,7 @@ int checkViews(struct coord pos, struct server *s, struct fish *f)
 	      printf("origin vue %d : %d %d\n",i,pos.x,pos.y);
 	      f->originiscalculated[i] = CALCULATED;
 	      f->progress[i] = ORIGIN;
+	      f->traverseorigin[i] = YES;
 	    }
 	}
       else
@@ -841,6 +871,7 @@ int checkViews(struct coord pos, struct server *s, struct fish *f)
 		  f->dest[i] = pos;
 		  printf("dest vue %d : %d %d\n", i, pos.x,pos.y);
 		  f->destiscalculated[i] = CALCULATED;  
+		  f->traversedest[i] = YES;
 		}	
 	    }
 	}
@@ -862,6 +893,8 @@ int moveFishes(struct server *s)
 
       memset(s->aqua.fishes[i].originiscalculated, NOT_CALCULATED, MAX_VIEWS*sizeof(int));
       memset(s->aqua.fishes[i].destiscalculated, NOT_CALCULATED, MAX_VIEWS*sizeof(int));
+      memset(s->aqua.fishes[i].traverseorigin, NO, MAX_VIEWS*sizeof(int));
+    memset(s->aqua.fishes[i].traversedest, NO, MAX_VIEWS*sizeof(int));
 
       struct coord init = s->aqua.fishes[i].old_pos;
       struct coord end = s->aqua.fishes[i].pos;

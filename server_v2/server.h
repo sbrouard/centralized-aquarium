@@ -42,6 +42,9 @@
 #define NOT_MOVING 2
 #define NOT_IN_VIEW 3
 
+#define YES 1
+#define NO 0
+
 struct coord{
   int x;
   int y;
@@ -74,7 +77,8 @@ struct fish{
   int originiscalculated[MAX_VIEWS];
   int destiscalculated[MAX_VIEWS];
   int progress[MAX_VIEWS];
-  
+  int traverseorigin[MAX_VIEWS];
+  int traversedest[MAX_VIEWS];
   
 };
 

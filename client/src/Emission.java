@@ -61,11 +61,11 @@ public class Emission implements Runnable {
 
 	try{
 	
-	    PrintWriter out = new PrintWriter(socket.getOutputStream());
-	    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	    final PrintWriter out = new PrintWriter(socket.getOutputStream());
+	    final BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	    
 	    boolean connected = false;
-	    Scanner sc = new Scanner(System.in);
+	    final Scanner sc = new Scanner(System.in);
 	    String cmd = sc.nextLine();
 
 	    /*
