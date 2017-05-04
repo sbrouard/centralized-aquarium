@@ -1,5 +1,6 @@
 import java.net.*;
 import java.io.*;
+import java.lang.*;
 
 public class Client {
 
@@ -7,22 +8,25 @@ public class Client {
 	
 	Socket socket = null;
 	Thread t = null;
+	ConfigParser cfg = new ConfigParser("affichage.cfg");
+	String address = cfg.getControllerAddress();
+	int port = cfg.getControllerPort();
 	
 	try {
-	    ConfigParser cfg = new ConfigParser("affichage.cfg");
-	    String address = cfg.getControllerAddress();
-	    int port = cfg.getControllerPort();
-	    socket = new Socket(address, port);
 	    
+	    socket = new Socket(address, port);
+	    	    
 	    t = new Thread(new Emission(socket, cfg.getDisplayTimeoutValue()));
 	    t.start();
 	    
-	} catch(UnknownHostException e){
-	    System.err.println("Impossible de se connecter a l'adresse " + socket.getLocalAddress());
 	} catch(IOException e){
-	    System.err.println("Aucun serveur a l'ecoute du port " + socket.getLocalPort());
-	} 
-	
+	    System.err.println("Aucun serveur a l'ecoute du port " + port + " à ladresse " + address + ".");
+	    System.err.println("Veuillez vérifier les données du fichier affichage.cfg, ou bien démarrer un serveur à cette addresse.");
+	    System.err.println("Arrêt du programme.");
+	    System.exit(1);
+	}
+
+	return;
     }
 
 }

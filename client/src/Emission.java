@@ -95,7 +95,8 @@ public class Emission implements Runnable {
 	    /*
 	     * TO RECEIVE MESSAGES FROM SERVER
 	     */
-	    Thread t2 = new Thread(new Reception(socket));
+	    Reception r = new Reception(socket);
+	    Thread t2 = new Thread(r);
 	    t2.start();
 	
 	    /*
@@ -114,12 +115,17 @@ public class Emission implements Runnable {
 	     * TO SEND MESSAGES TO SERVER
 	     */	
 	    while(true){
+		System.out.print("> ");
 		cmd = sc.nextLine();
 		out.println(cmd);
 		out.flush();
 	    }
+
 	} catch (IOException e){
-	    System.err.println("le serveur ne répond pas");
+	    System.err.println("le serveur ne répond pas. Arrêt du programme.");
+	    System.exit(1);
 	}
+
+	return;
     }
 }

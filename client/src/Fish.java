@@ -144,7 +144,7 @@ public class Fish extends JPanel{
 	    this.from_y = this.pos_y;
 	}
 	
-	//System.out.println(this.pos_x + " " + this.pos_y);
+	System.out.println(this);
 	
 	this.nbTimesUpdated++;
     }
