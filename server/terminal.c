@@ -139,7 +139,7 @@ void read_terminal(terminal *term)
 
 				if(i == NBR_CMD)
 				{
-					if(syntax_error("Unknow command",term))
+					if(syntax_error("Unknown command",term))
 					{
 						term->state = 0;
 						term->command_length = 0;
@@ -173,7 +173,7 @@ void read_terminal(terminal *term)
 		}
 		if(term->command_length > MAX_SIZE_CMD)
 		{
-			if(syntax_error("Unknow command",term))
+			if(syntax_error("Unknown command",term))
 			{
 				term->state = 0;
 				term->command_length = 0;
@@ -366,7 +366,7 @@ int parse_show_aquarium(terminal *term)
 			if(term->split_cmd.length != 8 || strncmp(term->split_cmd.str,"aquarium",8) != 0)
 			{
 				free_str_arg(&term->split_cmd);
-				return syntax_error("Unknow command",term);
+				return syntax_error("Unknown command",term);
 			}
 		case 3:
 			term->state = 3;
@@ -407,7 +407,7 @@ int parse_del_view(terminal *term)
 			if(term->split_cmd.length != 4 || strncmp(term->split_cmd.str,"view",4) != 0)
 			{
 				free_str_arg(&term->split_cmd);
-				return syntax_error("Unknow command",term);
+				return syntax_error("Unknown command",term);
 			}
 			free_str_arg(&term->split_cmd);
 		case 3:
@@ -469,7 +469,7 @@ int parse_add_view(terminal *term)
 			if(term->split_cmd.length != 4 || strncmp(term->split_cmd.str,"view",4) != 0)
 			{
 				free_str_arg(&term->split_cmd);
-				return syntax_error("Unknow command",term);
+				return syntax_error("Unknown command",term);
 			}
 			free_str_arg(&term->split_cmd);
 		case 3:

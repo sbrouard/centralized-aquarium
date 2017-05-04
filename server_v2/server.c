@@ -340,11 +340,11 @@ int findFishesOfView(struct aquarium* a, int view, int *tabfish)
 		{
 		  if (trad_coorx(a,view,posorigin.x) == 0)
 		    {
-		      posorigin.x -= a->fishes[i].size.width;
+		      posorigin.x -= (a->fishes[i].size.width * 100)/(a->views[view].size.width);
 		    }
 		  if (trad_coory(a,view,posorigin.y)== 0)
 		    {
-		         posorigin.y -= a->fishes[i].size.height;
+		      posorigin.y -= (a->fishes[i].size.height * 100)/(a->views[view].size.height);
 		    }
 		}
 
@@ -364,11 +364,11 @@ int findFishesOfView(struct aquarium* a, int view, int *tabfish)
 		{
 		  if (trad_coorx(a,view,posdest.x) == 0)
 		    {
-		      posdest.x -= a->fishes[i].size.width;
+		      posdest.x -= (a->fishes[i].size.width * 100)/(a->views[view].size.width);
 		    }
 		  if (trad_coory(a,view,posdest.y) == 0)
 		    {
-		         posdest.y -= a->fishes[i].size.height;
+		      posdest.y -= (a->fishes[i].size.height * 100)/(a->views[view].size.height);
 		    }
 		}
 
