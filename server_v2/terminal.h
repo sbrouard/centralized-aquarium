@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <termios.h>
 #include "server.h"
 #include "parse_aquarium.h"
 #include "config.h"
@@ -57,6 +58,7 @@ void free_str_arg(str_arg *str);
 void read_terminal(terminal *);
 int parse_load(terminal*);
 int parse_exit(terminal*);
+int parse_kill(terminal*);
 int parse_save(terminal *term);
 int parse_show_aquarium(terminal *term);
 int parse_add_view(terminal *term);
@@ -69,6 +71,8 @@ void cmd_show_aquarium(terminal *term);
 void cmd_add_view(terminal *term);
 void cmd_del_view(terminal *term);
 void cmd_launch(terminal *term);
+void cmd_kill(terminal *term);
 int init_terminal(terminal *term);
+void close_terminal(terminal *term);
 
 #endif

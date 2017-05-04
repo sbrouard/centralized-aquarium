@@ -13,11 +13,17 @@ command_function cmd_func[]={{"load  ",parse_load},
 
 int init_terminal(terminal *term)
 {
+	struct termios t;
+
 	term->command_length = 0;
 	term->state = 0;
 	term->is_next_get = 0;
 	term->caracter_count = 0;
 	term->is_killed = 0;
+
+	tcgetattr(0,&t);
+	t.c_lflag &= t.c_lflag^ISIG;
+	tcsetattr(0,TCSANOW,&t);
 
 	fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
 
@@ -31,6 +37,15 @@ int init_terminal(terminal *term)
 	parse_config_file(&term->serv.conf);
 
 	write(1,">",1);
+}
+
+void close_terminal(terminal *term)
+{
+	struct termios t;
+
+	tcgetattr(0,&t);
+	t.c_lflag |= ISIG;
+	tcsetattr(0,TCSANOW,&t);
 }
 
 void zero_str_arg(str_arg *str)
