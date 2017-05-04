@@ -2,17 +2,20 @@ import java.net.*;
 import java.io.*;
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.concurrent.*;
 
 public class Reception implements Runnable {
 
     private Socket socket;
     private Aquarium aquarium;
+    private final int timeUpdate;
     
     public Reception(Socket s){
 	socket = s;
 	aquarium = new Aquarium();
-	Thread t4 = new Thread(new Display(aquarium, 50));
-	t4.start();
+	//Thread t4 = new Thread(new Display(aquarium, 40));
+	this.timeUpdate = 40;
+	//t4.start();
     }
 
     private boolean parser(String line){
@@ -85,7 +88,16 @@ public class Reception implements Runnable {
     }
 
     public void run(){
-       	try{
+
+	final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+	executorService.scheduleAtFixedRate(new Runnable() {
+		@Override
+		public void run() {
+		    aquarium.update();
+		}
+	    }, 0, timeUpdate, TimeUnit.MILLISECONDS);
+
+	try{
 
 	    while(true){
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));

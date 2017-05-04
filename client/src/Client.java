@@ -14,7 +14,7 @@ public class Client {
 	    int port = cfg.getControllerPort();
 	    socket = new Socket(address, port);
 	    
-	    t = new Thread(new Connexion(socket));
+	    t = new Thread(new Emission(socket, cfg.getDisplayTimeoutValue()));
 	    t.start();
 	    
 	} catch(UnknownHostException e){
