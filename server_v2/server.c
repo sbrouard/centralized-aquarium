@@ -379,7 +379,7 @@ int sendFishesOfView(struct client_data* client, struct server* s){
 			 s->aqua.fishes[tabfish[i]].name,
 			 trad_coorx(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].postosend[client->id_view].x),
 			 trad_coory(&s->aqua,client->id_view,s->aqua.fishes[tabfish[i]].postosend[client->id_view].y), 
-			 s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, DEFAULT_DURATION);
+			 s->aqua.fishes[tabfish[i]].size.width,  s->aqua.fishes[tabfish[i]].size.height, (s->aqua.fishes[tabfish[i]].progress[client->id_view] == NOT_MOVING) ? 2*DEFAULT_DURATION : DEFAULT_DURATION);
       }
     
     strcat(msg, "\n");
