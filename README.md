@@ -1,4 +1,4 @@
-Aquarium centralisé
+Aquarium centralisé (fr)
 ==================
 
 Orgnisation du projet:
@@ -38,9 +38,10 @@ Cet aquarium est géré par:
 Attention à bien respecter la syntaxe pour le bon fonctionnment de l'aquarium (celui-ci est sensible à la casse)
 
 
+<hr>
 
 
-Centralized aquarium
+Centralized aquarium (en)
 ====================
 
 Introduction
