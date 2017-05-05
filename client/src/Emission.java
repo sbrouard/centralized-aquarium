@@ -51,7 +51,7 @@ public class Emission implements Runnable {
 	    return true;
 	else if (words.length != 4)
 	    return false;
-	else if (words[1] == "in" && words[2] == "as")
+	else if ("in".equals(words[1]) && "as".equals(words[2]))
 	    return true;
 	else 
 	    return false;
@@ -85,10 +85,10 @@ public class Emission implements Runnable {
 		String[] words_rep = rep.split(" ");
 		if(words_rep[0].equals("greeting")){
 		    connected = true;
-		    System.out.println("Vous êtes connecté");
+		    System.out.println("> Vous êtes connecté");
 		}
 		else
-		    System.err.println("Server did not accept the connection");
+		    System.err.println("> Server did not accept the connection");
 		
 	    }
 
@@ -115,14 +115,13 @@ public class Emission implements Runnable {
 	     * TO SEND MESSAGES TO SERVER
 	     */	
 	    while(true){
-		System.out.print("> ");
 		cmd = sc.nextLine();
 		out.println(cmd);
 		out.flush();
 	    }
 
 	} catch (IOException e){
-	    System.err.println("le serveur ne répond pas. Arrêt du programme.");
+	    System.err.println("> Le serveur ne répond pas. Arrêt du programme.");
 	    System.exit(1);
 	}
 
