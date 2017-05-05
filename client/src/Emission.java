@@ -106,7 +106,7 @@ public class Emission implements Runnable {
 	    executorService.scheduleAtFixedRate(new Runnable() {
 		    @Override
 		    public void run() {
-			out.println("ping");
+			out.println("ping" + socket.getPort());
 			out.flush();
 		    }
 		}, 0, timePing, TimeUnit.SECONDS);
@@ -123,6 +123,10 @@ public class Emission implements Runnable {
 	} catch (IOException e){
 	    System.err.println("> Le serveur ne répond pas. Arrêt du programme.");
 	    System.exit(1);
+	} catch (NoSuchElementException e){
+	    System.err.println("> Fin du fichier.");
+	    System.out.flush();
+
 	}
 
 	return;

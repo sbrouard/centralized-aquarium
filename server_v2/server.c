@@ -269,7 +269,7 @@ int trad_coory(struct aquarium *a,int view, int y){
 //utilisee dans hello() pour factoriser l'affectation d'une vue a un client
 int affect_available_view(struct server *s, struct client_data* client){
   int j;
-  char greet[12];
+  char greet[512];
   for (j = 0; j < s->aqua.nb_views && s->aqua.views[j].client != AVAILABLE; ++j){}
   if (j ==  s->aqua.nb_views){
     return -1;
