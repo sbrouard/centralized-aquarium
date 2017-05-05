@@ -23,7 +23,10 @@ Cet aquarium est géré par:
 
 ### Commandes du serveur (controlleur)
 
-#### Liste des poissons gérés par les vues:
+* Lancer le serveur: `make` puis `./serveur` (depuis le répertoire `server`)
+* Arrêter le serveur: `exit`
+
+### Liste des poissons gérés par les vues:
 * barbicha
 * barpau
 * kyogre

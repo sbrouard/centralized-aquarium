@@ -1,6 +1,6 @@
 import java.net.*;
 import java.io.*;
-import java.util.*;
+import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class Emission implements Runnable {
@@ -126,6 +126,7 @@ public class Emission implements Runnable {
 	} catch (NoSuchElementException e){
 	    System.err.println("> Fin du fichier.");
 	    System.out.flush();
+
 	}
 
 	return;

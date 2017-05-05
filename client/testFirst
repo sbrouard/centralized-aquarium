@@ -1,0 +1,8 @@
+hello
+addFish magicarpe at 50x50, 15x15, RandomWayPoint
+addFish magicarpe_2 at 20x20, 15x15, RandomWayPoint
+addFish leviator at 70x70, 10x20, RandomWayPoint
+startFish magicarpe
+startFish magicarpe_2
+startFish leviator
+getFishesContinuously
