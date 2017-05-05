@@ -1,6 +1,6 @@
 import java.net.*;
 import java.io.*;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class Emission implements Runnable {
@@ -123,6 +123,8 @@ public class Emission implements Runnable {
 	} catch (IOException e){
 	    System.err.println("> Le serveur ne répond pas. Arrêt du programme.");
 	    System.exit(1);
+	} catch (NoSuchElementException e){
+	    System.err.println("> Fin du fichier.");
 	}
 
 	return;
