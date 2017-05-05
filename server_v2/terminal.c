@@ -774,6 +774,7 @@ void cmd_add_view(terminal *term)
 	term->serv.aqua.views[term->serv.aqua.nb_views].size.height = term->cv.height;
 	term->serv.aqua.views[term->serv.aqua.nb_views].pos.x = term->cv.pos_x;
 	term->serv.aqua.views[term->serv.aqua.nb_views].pos.y = term->cv.pos_y;
+	term->serv.aqua.views[term->serv.aqua.nb_views].client = AVAILABLE;
 	term->serv.aqua.nb_views++;
 	printf("view N%d added\n",n);
 }

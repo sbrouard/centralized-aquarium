@@ -122,8 +122,7 @@ public class Reception implements Runnable {
 	    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	    while(running){
 		String msg = in.readLine();
-		System.out.println("");
-		System.out.println("< " + msg);
+		System.out.println(msg);
 		parser(msg);
 	    }
 
