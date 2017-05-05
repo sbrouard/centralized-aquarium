@@ -62,6 +62,12 @@ public class Fish extends JPanel{
 	    else if("poissirene".equals(type)){
 		this.image = ImageIO.read(new File("fishes/poissirene.png"));
 	    }
+	    else if("barpau".equals(type)){
+		this.image = ImageIO.read(new File("fishes/barpau.png"));
+	    }
+	    else if("barbicha".equals(type)){
+		this.image = ImageIO.read(new File("fishes/barbicha.png"));
+	    }
 	    else {
 		this.image = ImageIO.read(new File("fishes/magicarpe.png"));
 	    }
