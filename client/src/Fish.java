@@ -144,7 +144,7 @@ public class Fish extends JPanel{
 	    this.from_y = this.pos_y;
 	}
 	
-	System.out.println(this);
+	//System.out.println(this);
 	
 	this.nbTimesUpdated++;
     }
@@ -166,27 +166,29 @@ public class Fish extends JPanel{
     public void updateFish(Fish newFish){
 	fishLock.lock();
 	if(this.toGo_x != newFish.getToGoX() || this.toGo_y != newFish.getToGoY()){
+	    this.from_x = this.pos_x;
+	    this.from_y = this.pos_y;
 	    this.time = newFish.getTime();
 	    this.toGo_x = (newFish.getToGoX()*(int) this.screenSizeWidth)/100;
 	    this.toGo_y = (newFish.getToGoY()*(int) this.screenSizeHeight)/100;
 	    this.nbTimesUpdated = 0;
-	    this.from_x = this.pos_x;
-	    this.from_y = this.pos_y;
 	}
 	fishLock.unlock();
     }
 
     @Override
     public void paintComponent(Graphics g) {
-
 	if(this.pos_x < this.screenSizeWidth && this.pos_x > (0 - this.p_width) && this.pos_y > (0 - this.screenSizeHeight) && this.pos_y < this.screenSizeHeight){
 	    fishLock.lock();
+	    
 	    super.paintComponent(g);	  
 	    
-	    
-	    this.setBounds(this.pos_x, this.pos_y, this.p_width, this.p_height);
-	    g.drawImage(image, 0, 0, this.p_width, this.p_height, this);	    
+	    this.setBounds(this.pos_x, this.pos_y, this.p_width, this.p_height);	    	g.drawImage(image, 0, 0, this.p_width, this.p_height, this);	    
 	    fishLock.unlock();
+	} else {
+	    this.setBounds(0, 0, this.p_width, this.p_height);
+	    g.drawImage(image, 0 - this.p_width, 0 - this.p_height, this.p_width, this.p_height, this);	    
+	    
 	}
     }
 
