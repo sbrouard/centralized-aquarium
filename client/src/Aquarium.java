@@ -12,6 +12,7 @@ public class Aquarium extends JFrame{
     private ArrayList<Fish> fishes = new ArrayList<Fish>();
     private ReentrantLock fishesLock = new ReentrantLock();
 
+
     public Aquarium(){
 
 	this.setTitle("Aquarium");
