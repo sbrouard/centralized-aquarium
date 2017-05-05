@@ -20,7 +20,7 @@ public class Client {
 	    t.start();
 	    
 	} catch(IOException e){
-	    System.err.println("Aucun serveur a l'ecoute du port " + port + " à ladresse " + address + ".");
+	    System.err.println("Aucun serveur a l'ecoute du port " + port + " à l'adresse " + address + ".");
 	    System.err.println("Veuillez vérifier les données du fichier affichage.cfg, ou bien démarrer un serveur à cette addresse.");
 	    System.err.println("Arrêt du programme.");
 	    System.exit(1);
