@@ -84,7 +84,7 @@ public class Reception implements Runnable {
 		    
 		    running = false;
 		    socket.close();
-		    System.out.println("Déconnecté du serveur");
+		    System.out.println("> Déconnecté du serveur");
 		    System.exit(0);
 
 		    return true;
@@ -94,10 +94,10 @@ public class Reception implements Runnable {
 		}
 	    }
 	} catch(NullPointerException e){
-	    System.out.println("Le serveur a probablement quitté brutalement o_O . Arrêt du programme.");
+	    System.out.println("> Le serveur a probablement quitté brutalement o_O . Arrêt du programme.");
 	    System.exit(1);
 	} catch(IOException e){
-	    System.err.println("Erreur lors du log out : la connexion n'a pas pu être fermée. Arrêt du programme.");
+	    System.err.println("> Erreur lors du log out : la connexion n'a pas pu être fermée. Arrêt du programme.");
 	    System.exit(1);
 	}
 	
@@ -128,7 +128,7 @@ public class Reception implements Runnable {
 	    }
 
 	} catch(IOException e){
-	    System.err.println("Le serveur ne répond pas. Arrêt du programme.");
+	    System.err.println("> Le serveur ne répond pas. Arrêt du programme.");
 	    System.exit(1);
 	}
 
