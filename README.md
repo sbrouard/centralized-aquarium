@@ -13,7 +13,7 @@ Cet aquarium est géré par:
 
 * Éxécuter la vue: `make client`
 * Ouvrir la connexion avec le serveur: `hello [in as ID]`
-* ajouter un poisson: `addFish FishName at posXxposY,widthxlength,moves_algo` (moves_algo = "RandomWayPoint")`
+* ajouter un poisson: `addFish FishName at posXxposY,widthxlength,moves_algo` (moves_algo = "RandomWayPoint")
 * Supprimer un poisson: `delFish FishName`
 * Lancer un poisson: `startFish FishName`
 * Récupérer les informations sur les poissons: `getFishes`
@@ -23,7 +23,7 @@ Cet aquarium est géré par:
 
 ### Commandes du serveur (controlleur)
 
-* Lancer le serveur: `make` puis `./serveur` (depuis le répertoire `server`)
+* Lancer le serveur: `make` puis `./serveur` (depuis le répertoire `server`), et avant qu'un client se connecte: `load <nom du fichier aquarium>`, `lauch`
 * Arrêter le serveur: `exit`
 
 ### Liste des poissons gérés par les vues:
@@ -72,4 +72,4 @@ Server (controller):
 --------------------
 
 The commands are:
-* run the programme: make then ./server
+* run the programme: `make` then `./server`, and `load <nom du fichier aquarium>`, `lauch`
