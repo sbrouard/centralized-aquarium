@@ -13,9 +13,9 @@ Cet aquarium est géré par:
 
 * Éxécuter la vue: `make client`
 * Ouvrir la connexion avec le serveur: `hello [in as ID]`
-* ajouter un poisson: `addFish FishName at posXxposY,widthxlength,moves_algo` (moves_algo = "RandomWayPoint")
-* Supprimer un poisson: `delFish FishName`
-* Lancer un poisson: `startFish FishName`
+* ajouter un poisson: `addFish <FishName> at posXxposY, widthxlength, <moves_algo>` (moves_algo = "RandomWayPoint")
+* Supprimer un poisson: `delFish <FishName>`
+* Lancer un poisson: `startFish <FishName>`
 * Récupérer les informations sur les poissons: `getFishes`
 * Récupérer les informations sur les poissons en continu: `getFishesContinuously`
 * Envoyer un ping au serveur: `ping` (géré automatiquement)
@@ -60,7 +60,7 @@ First modify the file affichage.cfg, in particular the controller address.
 The commands are:
 * run the program: make aquarium
 * initiate connexion with the server: hello
-* add a fish: addFish FishName at posXxposY,widthxlength,moves_algo (moves_algo = "RandomWayPoint")
+* add a fish: addFish FishName at posXxposY, widthxlength, moves_algo (moves_algo = "RandomWayPoint")
 * delete a fish: delFish FishName
 * run a fish: startFish FishName
 * get the fishes informations: getFishes
