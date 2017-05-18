@@ -13,7 +13,7 @@ Cet aquarium est géré par:
 
 * Éxécuter la vue: `make client`
 * Ouvrir la connexion avec le serveur: `hello [in as ID]`
-* ajouter un poisson: `addFish <FishName> at posXxposY, widthxlength, <moves_algo>` (moves_algo = "RandomWayPoint")
+* ajouter un poisson: `addFish <FishName> at <posX>x<posY>, <width>x<length>, <moves_algo>` (moves_algo = "RandomWayPoint")
 * Supprimer un poisson: `delFish <FishName>`
 * Lancer un poisson: `startFish <FishName>`
 * Récupérer les informations sur les poissons: `getFishes`
