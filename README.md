@@ -19,7 +19,7 @@ Cet aquarium est géré par:
 * Récupérer les informations sur les poissons: `getFishes`
 * Récupérer les informations sur les poissons en continu: `getFishesContinuously`
 * Envoyer un ping au serveur: `ping` (géré automatiquement)
-* Se déconnecter: `logout`
+* Se déconnecter: `log out`
 
 ### Commandes du serveur (controlleur)
 
